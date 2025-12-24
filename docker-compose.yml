@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:7.0.2
+    container_name: nodejs-ecommerce-database-connection-mongodb
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=Mongo123
+      - MONGO_INITDB_ROOT_PASSWORD=Mongo123
+    volumes:
+      - nodejs_ecommerce_mongodb_data:/data/db
+    ports:
+      - 27017:27017
+
+volumes:
+   nodejs_ecommerce_mongodb_data:
