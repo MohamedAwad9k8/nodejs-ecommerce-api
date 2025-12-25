@@ -12,7 +12,7 @@ import {
   updateCategoryValidator,
   deleteCategoryValidator,
 } from '../utils/validators/category-validator.js';
-import { SubCategoryRouter } from './subCategory.route.js';
+import { SubCategoryRouter } from './subCategory.routes.js';
 
 export const CategoryRouter = express.Router();
 

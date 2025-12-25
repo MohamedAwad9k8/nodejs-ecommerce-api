@@ -5,8 +5,9 @@ import { dbConnect } from './config/database.js';
 import { ApiError, HttpStatusCode } from './utils/api-error.js';
 import { globalErrorHandler } from './middlewares/error.middleware.js';
 import { CategoryRouter } from './routes/category.routes.js';
-import { SubCategoryRouter } from './routes/subCategory.route.js';
+import { SubCategoryRouter } from './routes/subCategory.routes.js';
 import { BrandRouter } from './routes/brand.routes.js';
+import { ProductRouter } from './routes/product.routes.js';
 
 // Load environment variables from config.env file
 dotenv.config({ path: './config.env' });
@@ -29,6 +30,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/api/v1/categories', CategoryRouter);
 app.use('/api/v1/subcategories', SubCategoryRouter);
 app.use('/api/v1/brands', BrandRouter);
+app.use('/api/v1/products', ProductRouter);
 
 // Handle unhandled routes
 app.use((req, res, next) => {
@@ -47,6 +49,19 @@ app.use(globalErrorHandler);
 const port = process.env.PORT || 8000;
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+});
+
+// Make sure server is listening on port (port not in use)
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(
+      `Port ${port} is already in use. Please use a different port.`
+    );
+  } else {
+    console.error(`Server error: ${err}`);
+  }
+  // eslint-disable-next-line n/no-process-exit
+  process.exit(1);
 });
 
 // Handling unhandled rejections outside express

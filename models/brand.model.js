@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import { mongoose } from 'mongoose';
 
 // 1- Create Schema
 const brandSchema = new mongoose.Schema(
