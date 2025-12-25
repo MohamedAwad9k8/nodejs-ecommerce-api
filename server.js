@@ -1,16 +1,18 @@
-import express from "express";
-import dotenv from "dotenv";
-import morgan from "morgan";
-import { router as categoryRouter } from "./routes/category.routes.js";
-import { dbConnect } from "./config/database.js";
-import { ApiError, HttpStatusCode } from "./utils/api-error.js";
-import { globalErrorHandler } from "./middlewares/error.middleware.js";
+import express from 'express';
+import dotenv from 'dotenv';
+import morgan from 'morgan';
+import { dbConnect } from './config/database.js';
+import { ApiError, HttpStatusCode } from './utils/api-error.js';
+import { globalErrorHandler } from './middlewares/error.middleware.js';
+import { CategoryRouter } from './routes/category.routes.js';
+import { SubCategoryRouter } from './routes/subCategory.route.js';
+import { BrandRouter } from './routes/brand.routes.js';
 
 // Load environment variables from config.env file
-dotenv.config({ path: "./config.env" });
+dotenv.config({ path: './config.env' });
 
 // Connect to MongoDB
-await dbConnect(process.env.MONGODB_URI);
+dbConnect(process.env.MONGODB_URI);
 
 // Initialize Express app
 const app = express();
@@ -18,13 +20,15 @@ const app = express();
 // Middlewares
 app.use(express.json());
 
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
   console.log(`Mode: ${process.env.NODE_ENV}`);
 }
 
 // Mount Routes
-app.use("/api/v1/categories", categoryRouter);
+app.use('/api/v1/categories', CategoryRouter);
+app.use('/api/v1/subcategories', SubCategoryRouter);
+app.use('/api/v1/brands', BrandRouter);
 
 // Handle unhandled routes
 app.use((req, res, next) => {
@@ -46,10 +50,11 @@ const server = app.listen(port, () => {
 });
 
 // Handling unhandled rejections outside express
-process.on("unhandledRejection", (err) => {
+process.on('unhandledRejection', (err) => {
   console.error(`Unhandled Rejection: ${err.name} | ${err.message}`);
   server.close(() => {
-    console.error("Shutting down the server due to Unhandled Rejection");
+    console.error('Shutting down the server due to Unhandled Rejection');
   });
+  // eslint-disable-next-line n/no-process-exit
   process.exit(1);
 });

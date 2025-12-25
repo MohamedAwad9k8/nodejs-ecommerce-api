@@ -1,27 +1,28 @@
-import express from "express";
+import express from 'express';
 import {
   getCategories,
   getCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,
-} from "../services/category.service.js";
+} from '../services/category.service.js';
 import {
   getCategoryByIdValidator,
   createCategoryValidator,
   updateCategoryValidator,
   deleteCategoryValidator,
-} from "../utils/validators/category-validator.js";
+} from '../utils/validators/category-validator.js';
+import { SubCategoryRouter } from './subCategory.route.js';
 
-const router = express.Router();
+export const CategoryRouter = express.Router();
 
-router
-  .route("/")
+// Mount SubCategoryRouter on /:categoryId/categories (Nested Route)
+CategoryRouter.use('/:categoryId/subcategories', SubCategoryRouter);
+
+CategoryRouter.route('/')
   .get(getCategories)
   .post(createCategoryValidator, createCategory);
-router
-  .route("/:id")
+CategoryRouter.route('/:id')
   .get(getCategoryByIdValidator, getCategoryById)
   .put(updateCategoryValidator, updateCategory)
   .delete(deleteCategoryValidator, deleteCategory);
-export { router };
