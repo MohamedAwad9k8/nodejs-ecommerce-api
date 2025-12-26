@@ -22,7 +22,6 @@ export const getProductByIdValidator = [idRules(), validatorMiddleware];
 
 // @desc Validator Rules and middleware to create a new Product
 export const createProductValidator = [
-  idRules(),
   titleRules(true),
   descriptionRules(true),
   quantityRules(true),
@@ -42,6 +41,7 @@ export const createProductValidator = [
 
 // @desc Validator Rules and middleware to update Product by id
 export const updateProductValidator = [
+  idRules(),
   titleRules(false),
   descriptionRules(false),
   quantityRules(false),

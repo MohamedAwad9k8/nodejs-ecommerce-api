@@ -1,7 +1,10 @@
 import { check } from 'express-validator';
+import { CategoryModel } from '../../models/category.model.js';
+import { SubCategoryModel } from '../../models/subCategory.model.js';
 
-export const idRules = () =>
-  check('id').isMongoId().withMessage('Invalid ID format');
+export const idRules = () => [
+  check('id').isMongoId().withMessage('Invalid ID format'),
+];
 
 export const nameRules = (isRequired = true) =>
   (isRequired
@@ -107,15 +110,58 @@ export const categoryRules = (isRequired = true) =>
     : check('category').optional()
   )
     .isMongoId()
-    .withMessage('Invalid category id format');
+    .withMessage('Invalid category id format')
+    .custom((categoryId) =>
+      CategoryModel.findById(categoryId).then((category) => {
+        if (!category) {
+          return Promise.reject(
+            new Error(`No Category for this ID: ${categoryId}`)
+          );
+        }
+      })
+    );
 
 export const subcategoryRules = () =>
-  check('subcategory')
+  check('subcategories')
     .optional()
     .isArray()
     .withMessage('Subcategory must be an array of IDs')
     .isMongoId()
-    .withMessage('Invalid subcategory id format');
+    .withMessage('Invalid subcategory id format')
+    .custom((subcategoriesIds) =>
+      SubCategoryModel.find({
+        _id: { $exists: true, $in: subcategoriesIds },
+      }).then((result) => {
+        if (result.length < 1 || result.length !== subcategoriesIds.length) {
+          return Promise.reject(
+            new Error(
+              `One or more of the entered SubCategories IDs are Invalid`
+            )
+          );
+        }
+      })
+    )
+    .custom((subcategoriesIds, { req }) =>
+      SubCategoryModel.find({ category: req.body.category }).then(
+        (subcategories) => {
+          const subcategoriesIdsInDB = [];
+          subcategories.forEach((subcategory) => {
+            subcategoriesIdsInDB.push(subcategory._id.toString());
+          });
+          console.log(subcategoriesIdsInDB);
+          const isBelong = subcategoriesIds.every((subcategoryId) =>
+            subcategoriesIdsInDB.includes(subcategoryId)
+          );
+          if (!isBelong) {
+            return Promise.reject(
+              new Error(
+                `One or more of the entered Subcategories don't belong to this Category`
+              )
+            );
+          }
+        }
+      )
+    );
 
 export const brandRules = () =>
   check('brand').optional().isMongoId().withMessage('Invalid brand id format');

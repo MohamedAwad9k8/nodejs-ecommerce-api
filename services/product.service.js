@@ -7,13 +7,59 @@ import { ProductModel } from '../models/product.model.js';
 // @route   GET /api/v1/products
 // @access  Public
 export const getProducts = asyncHandler(async (req, res) => {
+  // 1) Filtering
+  const queryStringObject = { ...req.query };
+  const excludeFields = ['page', 'limit', 'sort', 'fields', 'keyword'];
+  excludeFields.forEach((field) => delete queryStringObject[field]);
+  // Apply Filtering for gt, gte, lt, lte, in
+  let queryString = JSON.stringify(queryStringObject);
+  queryString = queryString.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    (match) => `$${match}`
+  );
+  const queryStringObjectFinal = JSON.parse(queryString);
+
+  // 2) Pagination
   const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 5;
+  const limit = req.query.limit * 1 || 50;
   const skip = (page - 1) * limit;
-  const products = await ProductModel.find({})
+
+  // Build query
+  let mongooseQuery = ProductModel.find(queryStringObjectFinal)
     .skip(skip)
     .limit(limit)
     .populate({ path: 'category', select: 'name' });
+
+  // 3) Sorting
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ');
+    mongooseQuery = mongooseQuery.sort(sortBy);
+  } else {
+    mongooseQuery = mongooseQuery.sort('-createdAt');
+  }
+
+  // 4) Field limiting
+  if (req.query.fields) {
+    const fields = req.query.fields.split(',').join(' ');
+    mongooseQuery = mongooseQuery.select(fields);
+  } else {
+    mongooseQuery = mongooseQuery.select('-__v');
+  }
+
+  // 5) Search
+  if (req.query.keyword) {
+    const { keyword } = req.query;
+    const query = {};
+    query.$or = [
+      { title: { $regex: keyword, $options: 'i' } },
+      { description: { $regex: keyword, $options: 'i' } },
+    ];
+    mongooseQuery = mongooseQuery.find(query);
+  }
+
+  // Execute query
+  const products = await mongooseQuery;
+
   res.status(HttpStatusCode.OK).json({
     results: products.length,
     page,

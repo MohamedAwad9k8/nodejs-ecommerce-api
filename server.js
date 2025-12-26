@@ -20,6 +20,7 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
+app.set('query parser', 'extended');
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
