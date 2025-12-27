@@ -1,4 +1,5 @@
-import { check } from 'express-validator';
+import slugify from 'slugify';
+import { check, body } from 'express-validator';
 import { CategoryModel } from '../../models/category.model.js';
 import { SubCategoryModel } from '../../models/subCategory.model.js';
 
@@ -14,17 +15,25 @@ export const nameRules = (isRequired = true) =>
     .isLength({ min: 3, max: 32 })
     .withMessage(
       "Product name must be at least 3 characters and can't exceed 32 characters"
-    );
+    )
+    .custom((value, { req }) => {
+      req.body.slug = slugify(value);
+      return true;
+    });
 
 export const titleRules = (isRequired = true) =>
   (isRequired
     ? check('title').notEmpty().withMessage('Product title is required')
     : check('title').optional()
   )
-    .isLength({ min: 3, max: 32 })
+    .isLength({ min: 3, max: 64 })
     .withMessage(
-      "Product title must be at least 3 characters and can't exceed 32 characters"
-    );
+      "Product title must be at least 3 characters and can't exceed 64 characters"
+    )
+    .custom((value, { req }) => {
+      req.body.slug = slugify(value);
+      return true;
+    });
 
 export const descriptionRules = (isRequired = true) =>
   (isRequired
