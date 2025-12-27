@@ -10,7 +10,7 @@ export const createCategoryValidator = [nameRules(true), validatorMiddleware];
 // @desc Validator Rules and middleware to update category by id
 export const updateCategoryValidator = [
   idRules(),
-  nameRules(true),
+  nameRules(false),
   validatorMiddleware,
 ];
 

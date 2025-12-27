@@ -1,5 +1,5 @@
 import slugify from 'slugify';
-import { check, body } from 'express-validator';
+import { check } from 'express-validator';
 import { CategoryModel } from '../../models/category.model.js';
 import { SubCategoryModel } from '../../models/subCategory.model.js';
 

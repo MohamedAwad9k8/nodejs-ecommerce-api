@@ -1,6 +1,10 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+
 import { dbConnect } from './config/database.js';
 import { ApiError, HttpStatusCode } from './utils/api-error.js';
 import { globalErrorHandler } from './middlewares/error.middleware.js';
@@ -8,6 +12,10 @@ import { CategoryRouter } from './routes/category.routes.js';
 import { SubCategoryRouter } from './routes/subCategory.routes.js';
 import { BrandRouter } from './routes/brand.routes.js';
 import { ProductRouter } from './routes/product.routes.js';
+
+// define __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from config.env file
 dotenv.config({ path: './config.env' });
@@ -21,6 +29,7 @@ const app = express();
 // Middlewares
 app.use(express.json());
 app.set('query parser', 'extended');
+app.use(express.static(path.join(__dirname, '/uploads')));
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));

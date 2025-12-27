@@ -5,6 +5,8 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  uploadCategoryImage,
+  resizeImage,
 } from '../services/category.service.js';
 import {
   getCategoryByIdValidator,
@@ -21,8 +23,18 @@ CategoryRouter.use('/:categoryId/subcategories', SubCategoryRouter);
 
 CategoryRouter.route('/')
   .get(getCategories)
-  .post(createCategoryValidator, createCategory);
+  .post(
+    uploadCategoryImage,
+    resizeImage,
+    createCategoryValidator,
+    createCategory
+  );
 CategoryRouter.route('/:id')
   .get(getCategoryByIdValidator, getCategoryById)
-  .put(updateCategoryValidator, updateCategory)
+  .put(
+    uploadCategoryImage,
+    resizeImage,
+    updateCategoryValidator,
+    updateCategory
+  )
   .delete(deleteCategoryValidator, deleteCategory);
