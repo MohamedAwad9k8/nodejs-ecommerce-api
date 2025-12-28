@@ -1,5 +1,22 @@
-import { ProductModel } from '../models/product.model.js';
+import { resizeImagesForProducts } from '../middlewares/resize-image.middleware.js';
+import { uploadMixOfImages } from '../middlewares/upload-image.middleware.js';
 import * as factory from './handlers-factory.js';
+import { ProductModel } from '../models/product.model.js';
+
+// Middleware to handle mix of images upload into memory (buffer)
+export const uploadProductImages = uploadMixOfImages([
+  {
+    name: 'imageCover',
+    maxCount: 1,
+  },
+  {
+    name: 'images',
+    maxCount: 5,
+  },
+]);
+
+// Middleware to resize of uploaded product images and saving to server
+export const resizeProductImages = resizeImagesForProducts;
 
 // @desc    Get products
 // @route   GET /api/v1/products

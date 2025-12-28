@@ -10,7 +10,7 @@ export const createBrandValidator = [nameRules(true), validatorMiddleware];
 // @desc Validator Rules and middleware to update Brand by id
 export const updateBrandValidator = [
   idRules(),
-  nameRules(true),
+  nameRules(false),
   validatorMiddleware,
 ];
 

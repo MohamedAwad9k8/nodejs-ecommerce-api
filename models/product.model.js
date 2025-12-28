@@ -76,5 +76,31 @@ productSchema.pre(/^find/, function () {
   this.populate({ path: 'category', select: 'name slug -_id' });
 });
 
+const setImageUrl = (doc) => {
+  // Modify the image field to include the full URL path
+  if (doc.imageCover) {
+    const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
+    doc.imageCover = imageUrl;
+  }
+  if (doc.images && doc.images.length > 0) {
+    const imagesUrls = [];
+    doc.images.forEach((img) => {
+      const imgUrl = `${process.env.BASE_URL}/products/${img}`;
+      imagesUrls.push(imgUrl);
+    });
+    doc.images = imagesUrls;
+  }
+};
+
+// Mongoose Post Middleware to modify the imageCover field after retrieving a document
+// findOne, findAll, update
+productSchema.post('init', (doc) => {
+  setImageUrl(doc);
+});
+// create
+productSchema.post('save', (doc) => {
+  setImageUrl(doc);
+});
+
 // 2- Create Model
 export const ProductModel = mongoose.model('Product', productSchema);

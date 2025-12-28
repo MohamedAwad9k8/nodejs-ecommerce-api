@@ -1,5 +1,13 @@
-import { BrandModel } from '../models/brand.model.js';
+import { resizeImagesForBrands } from '../middlewares/resize-image.middleware.js';
 import * as factory from './handlers-factory.js';
+import { uploadSingleImage } from '../middlewares/upload-image.middleware.js';
+import { BrandModel } from '../models/brand.model.js';
+
+// Middleware to handle single image upload into memory (buffer)
+export const uploadBrandImage = uploadSingleImage('image');
+
+// Middleware to resize of uploaded brand image and saving to server
+export const resizeImage = resizeImagesForBrands;
 
 // @desc    Get brands
 // @route   GET /api/v1/brands
