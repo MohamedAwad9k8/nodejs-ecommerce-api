@@ -18,9 +18,14 @@ export const deleteOne = (Model) =>
 
 export const updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
-    const document = await Model.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const document = await Model.findByIdAndUpdate(
+      req.params.id,
+      // execlude password and isActive from update
+      { ...req.body, password: undefined, isActive: undefined },
+      {
+        new: true,
+      }
+    );
 
     if (!document) {
       return next(

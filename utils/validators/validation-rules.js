@@ -1,8 +1,11 @@
 import slugify from 'slugify';
+import bcrypt from 'bcryptjs';
 import { check } from 'express-validator';
 import { CategoryModel } from '../../models/category.model.js';
 import { SubCategoryModel } from '../../models/subCategory.model.js';
+import { UserModel } from '../../models/user.model.js';
 
+// Common validation rules
 export const idRules = () => [
   check('id').isMongoId().withMessage('Invalid ID format'),
 ];
@@ -21,6 +24,10 @@ export const nameRules = (isRequired = true) =>
       return true;
     });
 
+export const imageRules = () =>
+  check('image').optional().isString().withMessage('Image must be a string');
+
+// Product validation rules
 export const titleRules = (isRequired = true) =>
   (isRequired
     ? check('title').notEmpty().withMessage('Product title is required')
@@ -187,3 +194,81 @@ export const ratingsQuantityRules = () =>
     .optional()
     .isInt({ min: 0 })
     .withMessage('Ratings quantity must be a non-negative integer');
+
+// User validation rules
+export const emailRules = (isRequired = true) =>
+  (isRequired
+    ? check('email').notEmpty().withMessage('Email is required')
+    : check('email').optional()
+  )
+    .isEmail()
+    .withMessage('Invalid email address')
+    .custom((val) =>
+      UserModel.findOne({ email: val }).then((user) => {
+        if (user) {
+          return Promise.reject(new Error('E-mail already exists'));
+        }
+      })
+    );
+
+export const passwordRules = () =>
+  check('password')
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters');
+
+export const passwordConfirmRules = () =>
+  check('passwordConfirm')
+    .notEmpty()
+    .withMessage('Password confirmation is required')
+    .custom((value, { req }) => {
+      // verify password confirmation
+      if (value !== req.body.password) {
+        throw new Error('Password confirmation does not match password');
+      }
+      return true;
+    });
+
+export const currentPasswordRules = () =>
+  check('currentPassword')
+    .notEmpty()
+    .withMessage('Current password is required')
+    .custom(async (value, { req }) => {
+      // verify user id exists
+      const user = await UserModel.findById(req.params.id);
+      if (!user) {
+        throw new Error('User not found');
+      }
+      // verify current password
+      const isMatch = await bcrypt.compare(value, user.password);
+      if (!isMatch) {
+        throw new Error('Current password is incorrect');
+      }
+      return true;
+    });
+
+export const phoneRules = () =>
+  check('phone')
+    .optional()
+    .isMobilePhone(['ar-EG', 'ar-SA', 'en-US'])
+    .withMessage('Invalid phone number');
+
+export const roleRules = () =>
+  check('role')
+    .optional()
+    .isIn(['user', 'admin'])
+    .withMessage('Role must be either user or admin');
+
+export const profileImgRules = () =>
+  check('profileImg')
+    .optional()
+    .isString()
+    .withMessage('Profile image must be a string');
+
+export const isActiveRules = () =>
+  check('isActive')
+    .optional()
+    .isBoolean()
+    .withMessage('isActive must be a boolean value')
+    .toBoolean();

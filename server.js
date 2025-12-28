@@ -12,6 +12,7 @@ import { CategoryRouter } from './routes/category.routes.js';
 import { SubCategoryRouter } from './routes/subCategory.routes.js';
 import { BrandRouter } from './routes/brand.routes.js';
 import { ProductRouter } from './routes/product.routes.js';
+import { UserRouter } from './routes/user.route.js';
 
 // define __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -41,6 +42,7 @@ app.use('/api/v1/categories', CategoryRouter);
 app.use('/api/v1/subcategories', SubCategoryRouter);
 app.use('/api/v1/brands', BrandRouter);
 app.use('/api/v1/products', ProductRouter);
+app.use('/api/v1/users', UserRouter);
 
 // Handle unhandled routes
 app.use((req, res, next) => {

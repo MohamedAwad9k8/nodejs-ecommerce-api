@@ -43,14 +43,16 @@ export const resizeImagesForProducts = asyncHandler(async (req, res, next) => {
 export const resizeImagesForCategories = asyncHandler(
   async (req, res, next) => {
     const fileName = `category-${uuidv4()}-${Date.now()}.jpeg`;
-    await sharp(req.file.buffer)
-      .resize(600, 600)
-      .toFormat('jpeg')
-      .jpeg({ quality: 90 })
-      .toFile(`uploads/categories/${fileName}`);
+    if (req.file) {
+      await sharp(req.file.buffer)
+        .resize(600, 600)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`uploads/categories/${fileName}`);
 
-    // Save image filename to DB
-    req.body.image = fileName;
+      // Save image filename to DB
+      req.body.image = fileName;
+    }
     next();
   }
 );
@@ -58,13 +60,31 @@ export const resizeImagesForCategories = asyncHandler(
 // Middleware to resize of uploaded brand image and saving to server
 export const resizeImagesForBrands = asyncHandler(async (req, res, next) => {
   const fileName = `brand-${uuidv4()}-${Date.now()}.jpeg`;
-  await sharp(req.file.buffer)
-    .resize(600, 600)
-    .toFormat('jpeg')
-    .jpeg({ quality: 98 })
-    .toFile(`uploads/brands/${fileName}`);
+  if (req.file) {
+    await sharp(req.file.buffer)
+      .resize(600, 600)
+      .toFormat('jpeg')
+      .jpeg({ quality: 98 })
+      .toFile(`uploads/brands/${fileName}`);
 
-  // Save image filename to DB
-  req.body.image = fileName;
+    // Save image filename to DB
+    req.body.image = fileName;
+  }
+  next();
+});
+
+// Middleware to resize of uploaded user image and saving to server
+export const resizeImagesForUsers = asyncHandler(async (req, res, next) => {
+  const fileName = `user-${uuidv4()}-${Date.now()}.jpeg`;
+  if (req.file) {
+    await sharp(req.file.buffer)
+      .resize(600, 600)
+      .toFormat('jpeg')
+      .jpeg({ quality: 98 })
+      .toFile(`uploads/users/${fileName}`);
+
+    // Save profile image filename to DB
+    req.body.profileImg = fileName;
+  }
   next();
 });
