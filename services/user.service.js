@@ -15,37 +15,40 @@ export const resizeImage = resizeImagesForUsers;
 
 // @desc    Get Users
 // @route   GET /api/v1/users
-// @access  Private
+// @access  Private / Admin
 export const getUsers = factory.getAll(UserModel);
 
 // @desc Get Specific User
 // @route GET /api/v1/users/:id
-// @access Private
+// @access Private / Admin
 export const getUserById = factory.getOne(UserModel);
 
 // @desc    Create new User
 // @route   POST /api/v1/users
-// @access  Private
+// @access  Private / Admin
 export const createUser = factory.createOne(UserModel);
 
 // @desc   Update User by ID
 // @route  PUT /api/v1/users/:id
-// @access Private
+// @access Private / Admin
 export const updateUser = factory.updateOne(UserModel);
 
 // @desc   Delete User by ID
 // @route DELETE /api/v1/users/:id
-// @access Private
+// @access Private / Admin
 export const deleteUser = factory.deleteOne(UserModel);
 
 // @desc Change User's Password
 // @route PUT /api/v1/users/change-password/:id
-// @access Public
+// @access Private / Admin
 export const changeUserPassword = asyncHandler(async (req, res, next) => {
   const document = await UserModel.findByIdAndUpdate(
     req.params.id,
     // update password field only
-    { password: await bcrypt.hash(req.body.password, 12) },
+    {
+      password: await bcrypt.hash(req.body.password, 12),
+      passwordChangedAt: Date.now(),
+    },
     {
       new: true,
     }
@@ -65,7 +68,7 @@ export const changeUserPassword = asyncHandler(async (req, res, next) => {
 
 // @desc Deactivate User's Account
 // @route DELETE /api/v1/users/deactivate-account/:id
-// @access Private
+// @access Private / Admin
 export const deactivateUserAccount = asyncHandler(async (req, res, next) => {
   const document = await UserModel.findByIdAndUpdate(
     req.params.id,

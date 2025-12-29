@@ -31,15 +31,15 @@ export const getProductById = factory.getOne(ProductModel);
 
 // @desc    Create new product
 // @route   POST /api/v1/products
-// @access  Private
+// @access  Private / Admin - Manager
 export const createProduct = factory.createOne(ProductModel);
 
 // @desc   Update product by ID
 // @route  PUT /api/v1/products/:id
-// @access Private
+// @access Private / Admin - Manager
 export const updateProduct = factory.updateOne(ProductModel);
 
 // @desc   Delete Product by ID
 // @route DELETE /api/v1/products/:id
-// @access Private
+// @access Private / Admin
 export const deleteProduct = factory.deleteOne(ProductModel);

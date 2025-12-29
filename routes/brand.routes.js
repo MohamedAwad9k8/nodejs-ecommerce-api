@@ -14,13 +14,33 @@ import {
   updateBrandValidator,
   deleteBrandValidator,
 } from '../utils/validators/brand-validator.js';
+import { protectRoute, allowedRoles } from '../services/auth.service.js';
 
 export const BrandRouter = express.Router();
 
 BrandRouter.route('/')
   .get(getBrands)
-  .post(uploadBrandImage, resizeImage, createBrandValidator, createBrand);
+  .post(
+    protectRoute,
+    allowedRoles('admin', 'manager'),
+    uploadBrandImage,
+    resizeImage,
+    createBrandValidator,
+    createBrand
+  );
 BrandRouter.route('/:id')
   .get(getBrandByIdValidator, getBrandById)
-  .put(uploadBrandImage, resizeImage, updateBrandValidator, updateBrand)
-  .delete(deleteBrandValidator, deleteBrand);
+  .put(
+    protectRoute,
+    allowedRoles('admin', 'manager'),
+    uploadBrandImage,
+    resizeImage,
+    updateBrandValidator,
+    updateBrand
+  )
+  .delete(
+    protectRoute,
+    allowedRoles('admin'),
+    deleteBrandValidator,
+    deleteBrand
+  );

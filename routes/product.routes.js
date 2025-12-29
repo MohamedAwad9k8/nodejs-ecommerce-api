@@ -14,6 +14,7 @@ import {
   updateProductValidator,
   deleteProductValidator,
 } from '../utils/validators/product-validator.js';
+import { protectRoute, allowedRoles } from '../services/auth.service.js';
 //import { SubCategoryRouter } from './subCategory.routes.js';
 
 export const ProductRouter = express.Router();
@@ -24,6 +25,8 @@ export const ProductRouter = express.Router();
 ProductRouter.route('/')
   .get(getProducts)
   .post(
+    protectRoute,
+    allowedRoles('admin', 'manager'),
     uploadProductImages,
     resizeProductImages,
     createProductValidator,
@@ -32,9 +35,16 @@ ProductRouter.route('/')
 ProductRouter.route('/:id')
   .get(getProductByIdValidator, getProductById)
   .put(
+    protectRoute,
+    allowedRoles('admin', 'manager'),
     uploadProductImages,
     resizeProductImages,
     updateProductValidator,
     updateProduct
   )
-  .delete(deleteProductValidator, deleteProduct);
+  .delete(
+    protectRoute,
+    allowedRoles('admin'),
+    deleteProductValidator,
+    deleteProduct
+  );

@@ -21,15 +21,15 @@ export const getBrandById = factory.getOne(BrandModel);
 
 // @desc    Create new brand
 // @route   POST /api/v1/brands
-// @access  Private
+// @access  Private / Admin - Manager
 export const createBrand = factory.createOne(BrandModel);
 
 // @desc   Update Brand by ID
 // @route  PUT /api/v1/brands/:id
-// @access Private
+// @access Private / Admin - Manager
 export const updateBrand = factory.updateOne(BrandModel);
 
 // @desc   Delete Brand by ID
 // @route DELETE /api/v1/brands/:id
-// @access Private
+// @access Private / Admin
 export const deleteBrand = factory.deleteOne(BrandModel);

@@ -269,8 +269,8 @@ export const phoneRules = () =>
 export const roleRules = () =>
   check('role')
     .optional()
-    .isIn(['user', 'admin'])
-    .withMessage('Role must be either user or admin');
+    .isIn(['user', 'admin', 'manager'])
+    .withMessage('Role must be either user, admin or manager');
 
 export const profileImgRules = () =>
   check('profileImg')

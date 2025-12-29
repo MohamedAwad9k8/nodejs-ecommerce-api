@@ -21,15 +21,15 @@ export const getCategoryById = factory.getOne(CategoryModel);
 
 // @desc    Create new category
 // @route   POST /api/v1/categories
-// @access  Private
+// @access  Private / Admin - Manager
 export const createCategory = factory.createOne(CategoryModel);
 
 // @desc   Update Category by ID
 // @route  PUT /api/v1/categories/:id
-// @access Private
+// @access Private / Admin - Manager
 export const updateCategory = factory.updateOne(CategoryModel);
 
 // @desc   Delete Category by ID
 // @route DELETE /api/v1/categories/:id
-// @access Private
+// @access Private / Admin
 export const deleteCategory = factory.deleteOne(CategoryModel);
