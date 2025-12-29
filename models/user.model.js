@@ -46,5 +46,23 @@ userSchema.pre('save', async function () {
   this.password = await bcrypt.hash(this.password, 12);
 });
 
+const setImageUrl = (doc) => {
+  // Modify the image field to include the full URL path
+  if (doc.profileImg) {
+    const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImg}`;
+    doc.profileImg = imageUrl;
+  }
+};
+
+// Mongoose Post Middleware to modify the image field after retrieving a document
+// findOne, findAll, update
+userSchema.post('init', (doc) => {
+  setImageUrl(doc);
+});
+// create
+userSchema.post('save', (doc) => {
+  setImageUrl(doc);
+});
+
 // 2- Create Model
 export const UserModel = mongoose.model('User', userSchema);

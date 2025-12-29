@@ -196,27 +196,39 @@ export const ratingsQuantityRules = () =>
     .withMessage('Ratings quantity must be a non-negative integer');
 
 // User validation rules
-export const emailRules = (isRequired = true) =>
-  (isRequired
-    ? check('email').notEmpty().withMessage('Email is required')
-    : check('email').optional()
+export const emailRules = (isRequired = true, isLogin = false) => {
+  let validator = (
+    isRequired
+      ? check('email').notEmpty().withMessage('Email is required')
+      : check('email').optional()
   )
     .isEmail()
-    .withMessage('Invalid email address')
-    .custom((val) =>
+    .withMessage('Invalid email address');
+
+  if (!isLogin) {
+    validator = validator.custom((val) =>
       UserModel.findOne({ email: val }).then((user) => {
         if (user) {
           return Promise.reject(new Error('E-mail already exists'));
         }
       })
     );
+  }
 
-export const passwordRules = () =>
-  check('password')
+  return validator;
+};
+
+export const passwordRules = (isLogin = false) => {
+  let validator = check('password')
     .notEmpty()
-    .withMessage('Password is required')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters');
+    .withMessage('Password is required');
+  if (!isLogin) {
+    validator = validator
+      .isLength({ min: 6 })
+      .withMessage('Password must be at least 6 characters');
+  }
+  return validator;
+};
 
 export const passwordConfirmRules = () =>
   check('passwordConfirm')
