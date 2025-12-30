@@ -218,8 +218,8 @@ export const emailRules = (isRequired = true, isLogin = false) => {
   return validator;
 };
 
-export const passwordRules = (isLogin = false) => {
-  let validator = check('password')
+export const passwordRules = (isLogin = false, fieldName = 'password') => {
+  let validator = check(fieldName)
     .notEmpty()
     .withMessage('Password is required');
   if (!isLogin) {
@@ -230,13 +230,14 @@ export const passwordRules = (isLogin = false) => {
   return validator;
 };
 
-export const passwordConfirmRules = () =>
-  check('passwordConfirm')
+export const passwordConfirmRules = (fieldName = 'passwordConfirm') =>
+  check(fieldName)
     .notEmpty()
     .withMessage('Password confirmation is required')
     .custom((value, { req }) => {
+      const password = req.body.password || req.body.newPassword;
       // verify password confirmation
-      if (value !== req.body.password) {
+      if (value !== password) {
         throw new Error('Password confirmation does not match password');
       }
       return true;
@@ -284,3 +285,10 @@ export const isActiveRules = () =>
     .isBoolean()
     .withMessage('isActive must be a boolean value')
     .toBoolean();
+
+export const resetCodeRules = () =>
+  check('resetCode')
+    .notEmpty()
+    .withMessage('Reset code is required')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Reset code must be 6 characters long');
