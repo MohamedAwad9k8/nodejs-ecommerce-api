@@ -56,3 +56,22 @@ export const deactivateUserAccountValidator = [
   isActiveRules(),
   validatorMiddleware,
 ];
+
+// Validators for Logged-in User routes
+
+// @desc Validator Rules and middleware to update Logged-in User
+export const updateLoggedInUserValidator = [
+  nameRules(false),
+  emailRules(false),
+  phoneRules(),
+  profileImgRules(),
+  validatorMiddleware,
+];
+
+// @desc Validator Rules and middleware to change Logged-in User password
+export const changeLoggedInUserPasswordValidator = [
+  passwordRules(),
+  passwordConfirmRules(),
+  currentPasswordRules(),
+  validatorMiddleware,
+];

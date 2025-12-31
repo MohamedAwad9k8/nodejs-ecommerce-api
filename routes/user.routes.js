@@ -9,6 +9,9 @@ import {
   resizeImage,
   changeUserPassword,
   deactivateUserAccount,
+  getLoggedInUserData,
+  updateLoggedInUserData,
+  changeLoggedUserPassword,
 } from '../services/user.service.js';
 import {
   getUserByIdValidator,
@@ -17,44 +20,52 @@ import {
   deleteUserValidator,
   changeUserPasswordValidator,
   deactivateUserAccountValidator,
+  updateLoggedInUserValidator,
+  changeLoggedInUserPasswordValidator,
 } from '../utils/validators/user-validator.js';
 
 import { protectRoute, allowedRoles } from '../services/auth.service.js';
 
 export const UserRouter = express.Router();
 
+// Logged-in User Protected Routes
+UserRouter.use(protectRoute);
+UserRouter.route('/get-me').get(getLoggedInUserData, getUserById);
+UserRouter.route('/deactivate-me').put(
+  getLoggedInUserData,
+  deactivateUserAccount
+);
+UserRouter.route('/delete-me').delete(getLoggedInUserData, deleteUser);
+UserRouter.route('/update-me').put(
+  uploadUserImage,
+  resizeImage,
+  updateLoggedInUserValidator,
+  updateLoggedInUserData
+);
+UserRouter.route('/change-my-password').put(
+  getLoggedInUserData,
+  changeLoggedInUserPasswordValidator,
+  changeLoggedUserPassword
+);
+
+// Admin Protected Routes
+UserRouter.use(allowedRoles('admin'));
+
 UserRouter.route('/')
-  .get(protectRoute, allowedRoles('admin'), getUsers)
-  .post(
-    protectRoute,
-    allowedRoles('admin'),
-    uploadUserImage,
-    resizeImage,
-    createUserValidator,
-    createUser
-  );
+  .get(getUsers)
+  .post(uploadUserImage, resizeImage, createUserValidator, createUser);
+
 UserRouter.route('/:id')
-  .get(protectRoute, allowedRoles('admin'), getUserByIdValidator, getUserById)
-  .put(
-    protectRoute,
-    allowedRoles('admin'),
-    uploadUserImage,
-    resizeImage,
-    updateUserValidator,
-    updateUser
-  )
-  .delete(protectRoute, allowedRoles('admin'), deleteUserValidator, deleteUser);
+  .get(getUserByIdValidator, getUserById)
+  .put(uploadUserImage, resizeImage, updateUserValidator, updateUser)
+  .delete(deleteUserValidator, deleteUser);
 
 UserRouter.route('/change-password/:id').put(
-  protectRoute,
-  allowedRoles('admin'),
   changeUserPasswordValidator,
   changeUserPassword
 );
 
 UserRouter.route('/deactivate-account/:id').put(
-  protectRoute,
-  allowedRoles('admin'),
   deactivateUserAccountValidator,
   deactivateUserAccount
 );

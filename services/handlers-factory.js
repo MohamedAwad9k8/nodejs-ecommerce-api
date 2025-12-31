@@ -21,7 +21,7 @@ export const updateOne = (Model) =>
     const document = await Model.findByIdAndUpdate(
       req.params.id,
       // execlude password and isActive from update
-      { ...req.body, password: undefined, isActive: undefined },
+      { ...req.body, password: undefined },
       {
         new: true,
       }

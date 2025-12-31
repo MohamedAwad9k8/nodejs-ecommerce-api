@@ -12,12 +12,12 @@ export const idRules = () => [
 
 export const nameRules = (isRequired = true) =>
   (isRequired
-    ? check('name').notEmpty().withMessage('Product name is required')
+    ? check('name').notEmpty().withMessage('Name is required')
     : check('name').optional()
   )
     .isLength({ min: 3, max: 32 })
     .withMessage(
-      "Product name must be at least 3 characters and can't exceed 32 characters"
+      "Name must be at least 3 characters and can't exceed 32 characters"
     )
     .custom((value, { req }) => {
       req.body.slug = slugify(value);
