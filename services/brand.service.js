@@ -1,5 +1,5 @@
 import { resizeImagesForBrands } from '../middlewares/resize-image.middleware.js';
-import * as factory from './handlers-factory.js';
+import * as factory from './handlers/handlers-factory.js';
 import { uploadSingleImage } from '../middlewares/upload-image.middleware.js';
 import { BrandModel } from '../models/brand.model.js';
 

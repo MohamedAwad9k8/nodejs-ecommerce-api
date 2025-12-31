@@ -3,10 +3,10 @@ import {
   generateJWTToken,
   hashResetCode,
   generateResetCode,
-} from '../utils/crypto-functions.js';
-import { sendEmail } from '../utils/send-email.js';
-import { HttpStatusCode, ApiError } from '../utils/api-error.js';
-import { UserModel } from '../models/user.model.js';
+} from '../../utils/crypto-functions.js';
+import { sendEmail } from '../../utils/send-email.js';
+import { HttpStatusCode, ApiError } from '../../utils/api-error.js';
+import { UserModel } from '../../models/user.model.js';
 
 export const forgetPassword = () =>
   asyncHandler(async (req, res, next) => {

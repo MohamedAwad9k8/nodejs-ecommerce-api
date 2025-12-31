@@ -1,5 +1,5 @@
-import * as authHandler from './auth-handlers.js';
-import * as resetPasswordHandler from './reset-password-handlers.js';
+import * as authHandler from './handlers/auth-handlers.js';
+import * as resetPasswordHandler from './handlers/reset-password-handlers.js';
 
 // @desc Signup New User
 // @route POST /api/v1/auth/signup

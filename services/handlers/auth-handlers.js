@@ -6,9 +6,9 @@ import {
   generateJWTToken,
   verifyJWTToken,
   generateDummyHash,
-} from '../utils/crypto-functions.js';
-import { HttpStatusCode, ApiError } from '../utils/api-error.js';
-import { UserModel } from '../models/user.model.js';
+} from '../../utils/crypto-functions.js';
+import { HttpStatusCode, ApiError } from '../../utils/api-error.js';
+import { UserModel } from '../../models/user.model.js';
 
 export const login = () =>
   asyncHandler(async (req, res, next) => {

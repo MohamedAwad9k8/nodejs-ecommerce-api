@@ -1,5 +1,5 @@
 import { SubCategoryModel } from '../models/subCategory.model.js';
-import * as factory from './handlers-factory.js';
+import * as factory from './handlers/handlers-factory.js';
 
 // Nested Routes Middlewares
 //middleware to set filter object for getSubCategories nested route

@@ -1,6 +1,6 @@
 import { resizeImagesForProducts } from '../middlewares/resize-image.middleware.js';
 import { uploadMixOfImages } from '../middlewares/upload-image.middleware.js';
-import * as factory from './handlers-factory.js';
+import * as factory from './handlers/handlers-factory.js';
 import { ProductModel } from '../models/product.model.js';
 
 // Middleware to handle mix of images upload into memory (buffer)

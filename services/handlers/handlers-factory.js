@@ -1,6 +1,6 @@
 import asyncHandler from 'express-async-handler';
-import { HttpStatusCode, ApiError } from '../utils/api-error.js';
-import { ApiFeatures } from '../utils/api-features.js';
+import { HttpStatusCode, ApiError } from '../../utils/api-error.js';
+import { ApiFeatures } from '../../utils/api-features.js';
 
 export const deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {
