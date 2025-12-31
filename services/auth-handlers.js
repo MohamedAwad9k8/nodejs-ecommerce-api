@@ -80,7 +80,7 @@ export const protectRoute = () =>
 
     // 3) check if user exists and is active
     const currentUser = await UserModel.findById(decoded.userId);
-    const { isActive } = currentUser;
+    const isActive = currentUser?.isActive ?? false;
     if (!currentUser || !isActive) {
       return next(
         new ApiError(

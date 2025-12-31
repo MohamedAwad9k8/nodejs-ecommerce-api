@@ -4,7 +4,7 @@ import {
   hashResetCode,
   generateResetCode,
 } from '../utils/crypto-functions.js';
-import { sendEmail } from '../utils/validators/send-email.js';
+import { sendEmail } from '../utils/send-email.js';
 import { HttpStatusCode, ApiError } from '../utils/api-error.js';
 import { UserModel } from '../models/user.model.js';
 
@@ -12,7 +12,7 @@ export const forgetPassword = () =>
   asyncHandler(async (req, res, next) => {
     // 1) Get user by email
     const user = await UserModel.findOne({ email: req.body.email });
-    const { isActive } = user;
+    const isActive = user?.isActive ?? false;
     if (!user || !isActive) {
       return next(
         new ApiError(

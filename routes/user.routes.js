@@ -7,7 +7,7 @@ import {
   deleteUser,
   uploadUserImage,
   resizeImage,
-  changeUserPassword,
+  resetUserPassword,
   deactivateUserAccount,
   getLoggedInUserData,
   updateLoggedInUserData,
@@ -18,7 +18,6 @@ import {
   createUserValidator,
   updateUserValidator,
   deleteUserValidator,
-  changeUserPasswordValidator,
   deactivateUserAccountValidator,
   updateLoggedInUserValidator,
   changeLoggedInUserPasswordValidator,
@@ -27,6 +26,7 @@ import {
 import { protectRoute, allowedRoles } from '../services/auth.service.js';
 
 export const UserRouter = express.Router();
+export const AdminRouter = express.Router();
 
 // Logged-in User Protected Routes
 UserRouter.use(protectRoute);
@@ -49,23 +49,20 @@ UserRouter.route('/change-my-password').put(
 );
 
 // Admin Protected Routes
-UserRouter.use(allowedRoles('admin'));
+AdminRouter.use(protectRoute, allowedRoles('admin'));
 
-UserRouter.route('/')
+AdminRouter.route('/')
   .get(getUsers)
   .post(uploadUserImage, resizeImage, createUserValidator, createUser);
 
-UserRouter.route('/:id')
+AdminRouter.route('/:id')
   .get(getUserByIdValidator, getUserById)
   .put(uploadUserImage, resizeImage, updateUserValidator, updateUser)
   .delete(deleteUserValidator, deleteUser);
 
-UserRouter.route('/change-password/:id').put(
-  changeUserPasswordValidator,
-  changeUserPassword
-);
+AdminRouter.route('/reset-password/:id').put(resetUserPassword);
 
-UserRouter.route('/deactivate-account/:id').put(
+AdminRouter.route('/deactivate-account/:id').put(
   deactivateUserAccountValidator,
   deactivateUserAccount
 );

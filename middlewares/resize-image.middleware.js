@@ -7,7 +7,7 @@ import asyncHandler from 'express-async-handler';
 // Middleware to resize mix of uploaded images for products and save to server
 export const resizeImagesForProducts = asyncHandler(async (req, res, next) => {
   // Image processing for Image Cover
-  if (req.files.imageCover) {
+  if (req.files?.imageCover) {
     const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
     await sharp(req.files.imageCover[0].buffer)
       .resize(2000, 1333)
@@ -20,7 +20,7 @@ export const resizeImagesForProducts = asyncHandler(async (req, res, next) => {
   }
 
   // Image processing for Images
-  if (req.files.images && req.files.images.length > 0) {
+  if (req.files?.images && req.files?.images.length > 0) {
     req.body.images = [];
     await Promise.all(
       req.files.images.map(async (img, index) => {

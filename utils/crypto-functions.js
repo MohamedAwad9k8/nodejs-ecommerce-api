@@ -24,3 +24,17 @@ export const hashResetCode = (code) =>
 // Generate Dummy Hash for timing attack mitigation
 export const generateDummyHash = async () =>
   await bcrypt.hash('this-is-a-dummy-password', 12);
+
+// Generate a cryptographically-secure random password consisting of
+export const generateTempPassword = (length = 12) => {
+  if (length < 8) {
+    throw new Error('Temp Password length should be at least 8 characters');
+  }
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*?'; // letters + digits. Adjust `chars` if you want symbols included.
+  const bytes = crypto.randomBytes(length);
+  // Map random bytes to chars
+  return Array.from(bytes)
+    .map((b) => chars[b % chars.length])
+    .join('');
+};

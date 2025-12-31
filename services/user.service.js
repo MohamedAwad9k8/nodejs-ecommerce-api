@@ -4,7 +4,11 @@ import bcrypt from 'bcryptjs';
 import { resizeImagesForUsers } from '../middlewares/resize-image.middleware.js';
 import * as factory from './handlers-factory.js';
 import { uploadSingleImage } from '../middlewares/upload-image.middleware.js';
-import { generateJWTToken } from '../utils/crypto-functions.js';
+import {
+  generateJWTToken,
+  generateTempPassword,
+} from '../utils/crypto-functions.js';
+import { sendEmail } from '../utils/send-email.js';
 import { HttpStatusCode, ApiError } from '../utils/api-error.js';
 import { UserModel } from '../models/user.model.js';
 
@@ -39,15 +43,27 @@ export const updateUser = factory.updateOne(UserModel);
 // @access Private / Admin
 export const deleteUser = factory.deleteOne(UserModel);
 
-// @desc Change User's Password
-// @route PUT /api/v1/users/change-password/:id
+// @desc Reset User's Password
+// @route PUT /api/v1/users/reset-password/:id
 // @access Private / Admin
-export const changeUserPassword = asyncHandler(async (req, res, next) => {
-  const user = await UserModel.findByIdAndUpdate(
+export const resetUserPassword = asyncHandler(async (req, res, next) => {
+  // 1) Find User By ID and save old password in memory in case of rollback
+  const user = await UserModel.findById(req.params.id);
+  if (!user) {
+    return next(new ApiError(`user not found`, HttpStatusCode.NOT_FOUND));
+  }
+  const oldPassword = user.password;
+  const oldPasswordChangedAt = user.passwordChangedAt;
+  // 2) Generate Temp Password and Hash it
+  const tempPassword = generateTempPassword(16);
+  const hashedTempPassword = await bcrypt.hash(tempPassword, 12);
+
+  // 3) update user password in DB
+  const updatedUser = await UserModel.findByIdAndUpdate(
     req.params.id,
     // update password field only
     {
-      password: await bcrypt.hash(req.body.password, 12),
+      password: hashedTempPassword,
       passwordChangedAt: Date.now(),
     },
     {
@@ -55,13 +71,53 @@ export const changeUserPassword = asyncHandler(async (req, res, next) => {
     }
   );
 
-  if (!user) {
-    return next(new ApiError(`user not found`, HttpStatusCode.NOT_FOUND));
+  if (!updatedUser) {
+    return next(
+      new ApiError(
+        `Failed to update user password`,
+        HttpStatusCode.INTERNAL_SERVER_ERROR
+      )
+    );
   }
 
+  // 4) Send Email to user with the temp password
+  const message =
+    `Hello ${user.name},\n` +
+    `Your password has been reset by admin. Your temporary password is: ${tempPassword}\n` +
+    `Please log in and change your password immediately.\n` +
+    'Best regards,\nE-commerce Team';
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Your Password Has Been Reset',
+      message,
+    });
+  } catch (error) {
+    // 5) In case of error, rollback to old password
+    const rolledbackUser = await UserModel.findByIdAndUpdate(
+      req.params.id,
+      { password: oldPassword, passwordChangedAt: oldPasswordChangedAt },
+      { new: true }
+    );
+    if (!rolledbackUser) {
+      return next(
+        new ApiError(
+          'Critical Error: Failed to rollback user password after email failure.',
+          HttpStatusCode.INTERNAL_SERVER_ERROR
+        )
+      );
+    }
+    return next(
+      new ApiError(
+        'There was an error sending the email. Password not updated. Try again later.',
+        HttpStatusCode.INTERNAL_SERVER_ERROR
+      )
+    );
+  }
+
+  // 6) Send Success response to admin
   res.status(HttpStatusCode.OK).json({
-    data: user,
-    message: `user updated successfully`,
+    message: `user password reseted successfully`,
   });
 });
 
@@ -130,7 +186,7 @@ export const changeLoggedUserPassword = asyncHandler(async (req, res, next) => {
     req.user._id,
     // update password field only
     {
-      password: await bcrypt.hash(req.body.password, 12),
+      password: await bcrypt.hash(req.body.newPassword, 12),
       passwordChangedAt: Date.now(),
     },
     {

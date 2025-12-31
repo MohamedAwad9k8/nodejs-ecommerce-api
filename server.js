@@ -12,7 +12,7 @@ import { CategoryRouter } from './routes/category.routes.js';
 import { SubCategoryRouter } from './routes/subCategory.routes.js';
 import { BrandRouter } from './routes/brand.routes.js';
 import { ProductRouter } from './routes/product.routes.js';
-import { UserRouter } from './routes/user.routes.js';
+import { UserRouter, AdminRouter } from './routes/user.routes.js';
 import { AuthRouter } from './routes/auth.routes.js';
 
 // define __dirname
@@ -44,6 +44,7 @@ app.use('/api/v1/subcategories', SubCategoryRouter);
 app.use('/api/v1/brands', BrandRouter);
 app.use('/api/v1/products', ProductRouter);
 app.use('/api/v1/users', UserRouter);
+app.use('/api/v1/admin/users', AdminRouter);
 app.use('/api/v1/auth', AuthRouter);
 
 // Handle unhandled routes
