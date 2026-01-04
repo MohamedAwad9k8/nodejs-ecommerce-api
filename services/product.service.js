@@ -26,7 +26,7 @@ export const getProducts = factory.getAll(ProductModel);
 // @desc Get Specific product
 // @route GET /api/v1/products/:id
 // @access Public
-export const getProductById = factory.getOne(ProductModel);
+export const getProductById = factory.getOne(ProductModel, 'reviews');
 //still need to set populate for this query, but we will do it through mongoose middleware
 
 // @desc    Create new product

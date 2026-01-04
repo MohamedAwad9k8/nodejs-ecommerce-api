@@ -2,7 +2,10 @@ import { SubCategoryModel } from '../models/subCategory.model.js';
 import * as factory from './handlers/handlers-factory.js';
 
 // Nested Routes Middlewares
-//middleware to set filter object for getSubCategories nested route
+
+// @desc Middleware to set filter object for getSubCategories nested route
+// @router Get /api/v1/categories/:categoryId/subcategories
+// @access Public
 export const setFilterObject = (req, res, next) => {
   let filterObject = {};
   if (req.params.categoryId) {
@@ -11,7 +14,10 @@ export const setFilterObject = (req, res, next) => {
   req.filterObject = filterObject;
   next();
 };
-// middleware to set categoryId to body if not provided, this is useful for create nested route
+
+// @desc Middleware to set categoryId to body if not provided, this is useful for create nested route
+// @router Post /api/v1/categories/:categoryId/subcategories
+// @access Private / Admin - Manager
 export const setCategoryIdToBody = (req, res, next) => {
   //nested route categoryId
   if (!req.body.category) {

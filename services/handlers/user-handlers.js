@@ -160,3 +160,86 @@ export const changeLoggedUserPassword = () =>
       token,
     });
   });
+
+export const addProductToWishlist = () =>
+  asyncHandler(async (req, res, next) => {
+    const user = await UserModel.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { wishlist: req.body.productId } },
+      { new: true }
+    );
+
+    res.status(HttpStatusCode.OK).json({
+      status: 'success',
+      data: user.wishlist,
+      message: `Product added to wishlist successfully`,
+    });
+  });
+
+export const removeProductFromWishlist = () =>
+  asyncHandler(async (req, res, next) => {
+    const user = await UserModel.findByIdAndUpdate(
+      req.user._id,
+      { $pull: { wishlist: req.params.productId } },
+      { new: true }
+    );
+
+    res.status(HttpStatusCode.OK).json({
+      status: 'success',
+      data: user.wishlist,
+      message: `Product removed from wishlist successfully`,
+    });
+  });
+
+export const getLoggedInUserWishlist = () =>
+  asyncHandler(async (req, res, next) => {
+    // Make sure populate returns only relevant fields
+    const user = await UserModel.findById(req.user._id).populate({
+      path: 'wishlist',
+      select: 'title price imagCover ratingsAverage ratingsQuantity category',
+    });
+    res.status(200).json({
+      results: user.wishlist.length,
+      data: user.wishlist,
+    });
+  });
+
+export const addAddress = () =>
+  asyncHandler(async (req, res, next) => {
+    const user = await UserModel.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { addresses: req.body } },
+      { new: true }
+    );
+
+    res.status(HttpStatusCode.OK).json({
+      status: 'success',
+      data: user.addresses,
+      message: `Address added successfully`,
+    });
+  });
+
+export const removeAddress = () =>
+  asyncHandler(async (req, res, next) => {
+    const user = await UserModel.findByIdAndUpdate(
+      req.user._id,
+      { $pull: { addresses: { _id: req.params.addressId } } },
+      { new: true }
+    );
+
+    res.status(HttpStatusCode.OK).json({
+      status: 'success',
+      data: user.addresses,
+      message: `Address removed successfully`,
+    });
+  });
+
+export const getLoggedInUserAddresses = () =>
+  asyncHandler(async (req, res, next) => {
+    // Make sure populate returns only relevant fields
+    const user = await UserModel.findById(req.user._id);
+    res.status(200).json({
+      results: user.addresses.length,
+      data: user.addresses,
+    });
+  });

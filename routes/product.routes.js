@@ -15,12 +15,12 @@ import {
   deleteProductValidator,
 } from '../utils/validators/product-validator.js';
 import { protectRoute, allowedRoles } from '../services/auth.service.js';
-//import { SubCategoryRouter } from './subCategory.routes.js';
+import { ReviewRouter } from './review.routes.js';
 
 export const ProductRouter = express.Router();
 
-// Mount SubCategoryRouter on /:categoryId/categories (Nested Route)
-//CategoryRouter.use('/:categoryId/subcategories', SubCategoryRouter);
+// Mount ReviewRouter on /:productId/reviews (Nested Route)
+ProductRouter.use('/:productId/reviews', ReviewRouter);
 
 ProductRouter.route('/')
   .get(getProducts)

@@ -14,6 +14,9 @@ import { BrandRouter } from './routes/brand.routes.js';
 import { ProductRouter } from './routes/product.routes.js';
 import { UserRouter, AdminRouter } from './routes/user.routes.js';
 import { AuthRouter } from './routes/auth.routes.js';
+import { ReviewRouter } from './routes/review.routes.js';
+import { WishlistRouter } from './routes/wishlist.routes.js';
+import { AddressRouter } from './routes/address.routes.js';
 
 // define __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -46,6 +49,9 @@ app.use('/api/v1/products', ProductRouter);
 app.use('/api/v1/users', UserRouter);
 app.use('/api/v1/admin/users', AdminRouter);
 app.use('/api/v1/auth', AuthRouter);
+app.use('/api/v1/reviews', ReviewRouter);
+app.use('/api/v1/wishlist', WishlistRouter);
+app.use('/api/v1/addresses', AddressRouter);
 
 // Handle unhandled routes
 app.use((req, res, next) => {

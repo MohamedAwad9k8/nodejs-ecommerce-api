@@ -106,3 +106,28 @@ export const quantityRules = (isRequired = true, fieldName = 'quantity') =>
     .isInt({ min: 0 })
     .withMessage(`${fieldName} must be a non-negative integer`)
     .toInt();
+
+/**
+ * Validator for ratings average field.
+ * Ensures the value is between 1 and 5.
+ * @param {boolean} isRequired - Whether the field is required. Default is true.
+ * @param {string} fieldName - The name of the field to validate. Default is 'ratingsAverage'.
+ * Values can be "ratingsAverage" or "rating"
+ * [Always Optional Field.]
+ */
+export const ratingsRules = (isRequired = true, fieldName = 'ratingsAverage') =>
+  (isRequired
+    ? check(fieldName).notEmpty().withMessage('Ratings average is required')
+    : check(fieldName).optional()
+  )
+    .isFloat({ min: 1, max: 5 })
+    .withMessage('Ratings average must be a number between 1 and 5')
+    .toFloat();
+
+// Sanitizer to remove product from incoming payload on update
+/**
+ * Sanitizer to remove specific fields from specific requests.
+ * @param {string} fieldName - The name of the field to remove.
+ */
+export const removeField = (fieldName) =>
+  check(fieldName).customSanitizer(() => undefined);

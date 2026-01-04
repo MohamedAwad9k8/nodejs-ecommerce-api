@@ -115,16 +115,3 @@ export const subcategoryRules = () =>
  */
 export const brandRules = () =>
   check('brand').optional().isMongoId().withMessage('Invalid brand id format');
-
-/**
- * Validator for ratings average field.
- * Ensures the value is between 1 and 5.
- *
- * [Always Optional Field.]
- */
-export const ratingsAverageRules = () =>
-  check('ratingsAverage')
-    .optional()
-    .isFloat({ min: 1, max: 5 })
-    .withMessage('Ratings average must be a number between 1 and 5')
-    .toFloat();

@@ -12,7 +12,6 @@ export const deleteOne = (Model) =>
         new ApiError(`${Model.modelName} not found`, HttpStatusCode.NOT_FOUND)
       );
     }
-
     res.status(HttpStatusCode.NO_CONTENT).json();
   });
 
@@ -48,9 +47,23 @@ export const createOne = (Model) =>
     });
   });
 
-export const getOne = (Model) =>
+export const getOne = (Model, populateOptions) =>
   asyncHandler(async (req, res, next) => {
-    const document = await Model.findById(req.params.id);
+    // 1) Build Query
+
+    // Optional filter for nested routes
+    const filter = req.filterObject || {};
+
+    const queryObject = { _id: req.params.id, ...filter };
+    let query = Model.findOne(queryObject);
+
+    // Optional populate fields
+    if (populateOptions) {
+      query = query.populate(populateOptions);
+    }
+
+    // 2) Execute Query
+    const document = await query;
     if (!document) {
       return next(
         new ApiError(`${Model.modelName} not found`, HttpStatusCode.NOT_FOUND)
@@ -63,7 +76,6 @@ export const getAll = (Model) =>
   asyncHandler(async (req, res) => {
     let filter = {};
     if (req.filterObject) filter = req.filterObject;
-    req.filterObject = filter;
 
     // Build query
     const documentsCount = await Model.countDocuments();

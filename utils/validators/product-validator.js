@@ -5,7 +5,6 @@ import {
   categoryRules,
   subcategoryRules,
   brandRules,
-  ratingsAverageRules,
 } from './validation-rules/products-validation-rules.js';
 import {
   idRules,
@@ -14,6 +13,7 @@ import {
   optionalArrayRules,
   descriptionRules,
   quantityRules,
+  ratingsRules,
 } from './validation-rules/common-validation-rules.js';
 // @desc Validator Rules and middleware to get Product by id
 export const getProductByIdValidator = [idRules(), validatorMiddleware];
@@ -32,7 +32,7 @@ export const createProductValidator = [
   categoryRules(true),
   subcategoryRules(),
   brandRules(),
-  ratingsAverageRules(),
+  ratingsRules(false, 'ratingsAverage'),
   quantityRules(false, 'ratingsQuantity'),
   validatorMiddleware,
 ];
@@ -52,7 +52,7 @@ export const updateProductValidator = [
   categoryRules(false),
   subcategoryRules(),
   brandRules(),
-  ratingsAverageRules(),
+  ratingsRules(false, 'ratingsAverage'),
   quantityRules(false, 'ratingsQuantity'),
   validatorMiddleware,
 ];
