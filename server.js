@@ -8,15 +8,7 @@ import morgan from 'morgan';
 import { dbConnect } from './config/database.js';
 import { ApiError, HttpStatusCode } from './utils/api-error.js';
 import { globalErrorHandler } from './middlewares/error.middleware.js';
-import { CategoryRouter } from './routes/category.routes.js';
-import { SubCategoryRouter } from './routes/subCategory.routes.js';
-import { BrandRouter } from './routes/brand.routes.js';
-import { ProductRouter } from './routes/product.routes.js';
-import { UserRouter, AdminRouter } from './routes/user.routes.js';
-import { AuthRouter } from './routes/auth.routes.js';
-import { ReviewRouter } from './routes/review.routes.js';
-import { WishlistRouter } from './routes/wishlist.routes.js';
-import { AddressRouter } from './routes/address.routes.js';
+import { mountRoutes } from './routes/index.js';
 
 // define __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -42,16 +34,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Mount Routes
-app.use('/api/v1/categories', CategoryRouter);
-app.use('/api/v1/subcategories', SubCategoryRouter);
-app.use('/api/v1/brands', BrandRouter);
-app.use('/api/v1/products', ProductRouter);
-app.use('/api/v1/users', UserRouter);
-app.use('/api/v1/admin/users', AdminRouter);
-app.use('/api/v1/auth', AuthRouter);
-app.use('/api/v1/reviews', ReviewRouter);
-app.use('/api/v1/wishlist', WishlistRouter);
-app.use('/api/v1/addresses', AddressRouter);
+mountRoutes(app);
 
 // Handle unhandled routes
 app.use((req, res, next) => {
