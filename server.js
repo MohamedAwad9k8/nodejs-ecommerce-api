@@ -9,6 +9,8 @@ import cors from 'cors';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
+import ExpressMongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
 
 import { dbConnect } from './config/database.js';
 import { ApiError, HttpStatusCode } from './utils/api-error.js';
@@ -50,6 +52,10 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   console.log(`Mode: ${process.env.NODE_ENV}`);
 }
+
+// Data Sanitization against NoSQL query injection and XSS attacks
+app.use(ExpressMongoSanitize());
+app.use(xss());
 
 // Rate Limiter Middleware
 const limiter = rateLimit({
