@@ -7,6 +7,8 @@ import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import hpp from 'hpp';
 
 import { dbConnect } from './config/database.js';
 import { ApiError, HttpStatusCode } from './utils/api-error.js';
@@ -48,6 +50,20 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
   console.log(`Mode: ${process.env.NODE_ENV}`);
 }
+
+// Rate Limiter Middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
+// Apply rate limiting middleware to all API routes
+app.use('/api', limiter);
+
+// Middleware to prevent HTTP Parameter Pollution
+app.use(
+  hpp({ whitelist: ['price', 'ratingAverage', 'subcategories', 'images'] })
+);
 
 // Mount Routes
 mountRoutes(app);
