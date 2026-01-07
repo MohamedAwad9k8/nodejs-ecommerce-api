@@ -1,27 +1,43 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import 'dotenv/config';
 import express from 'express';
-import dotenv from 'dotenv';
+//import dotenv from 'dotenv';
 import morgan from 'morgan';
+import cors from 'cors';
+import compression from 'compression';
 
 import { dbConnect } from './config/database.js';
 import { ApiError, HttpStatusCode } from './utils/api-error.js';
 import { globalErrorHandler } from './middlewares/error.middleware.js';
 import { mountRoutes } from './routes/index.js';
+import { webhookCheckout } from './services/order.service.js';
 
 // define __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables from config.env file
-dotenv.config({ path: './config.env' });
+//dotenv.config({ path: './config.env' });
 
 // Connect to MongoDB
 dbConnect(process.env.MONGODB_URI);
 
 // Initialize Express app
 const app = express();
+// Enable CORS
+app.use(cors());
+
+// Enable Compression
+app.use(compression());
+
+// Checkout Webhook
+app.post(
+  '/webhook-checkout',
+  express.raw({ type: 'application/json' }),
+  webhookCheckout
+);
 
 // Middlewares
 app.use(express.json());

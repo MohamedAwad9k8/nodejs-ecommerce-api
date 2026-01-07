@@ -6,6 +6,7 @@ import {
   getOrderById,
   updateOrderToPaid,
   updateOrderToDelivered,
+  getCheckoutSession,
 } from '../services/order.service.js';
 
 import { protectRoute, allowedRoles } from '../services/auth.service.js';
@@ -20,9 +21,11 @@ OrderRouter.route('/').get(
   getOrders
 );
 
-OrderRouter.route('/:id')
-  .post(allowedRoles('user'), createCashOrder)
-  .get(allowedRoles('user', 'admin', 'manager'), setUserIdFilter, getOrderById);
+OrderRouter.route('/:id').get(
+  allowedRoles('user', 'admin', 'manager'),
+  setUserIdFilter,
+  getOrderById
+);
 
 OrderRouter.route('/:id/pay').put(
   allowedRoles('admin', 'manager'),
@@ -32,4 +35,11 @@ OrderRouter.route('/:id/pay').put(
 OrderRouter.route('/:id/deliver').put(
   allowedRoles('admin', 'manager'),
   updateOrderToDelivered
+);
+
+OrderRouter.route('/:cartId').post(allowedRoles('user'), createCashOrder);
+
+OrderRouter.route('/checkout/:cartId').get(
+  allowedRoles('user'),
+  getCheckoutSession
 );
