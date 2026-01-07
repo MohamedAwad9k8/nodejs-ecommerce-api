@@ -178,7 +178,7 @@ export const getCheckoutSession = asyncHandler(async (req, res, next) => {
   });
 });
 
-//
+// Create Order from Stripe Checkout Session
 export const createOrder = async (session) => {
   const cartId = session.client_reference_id;
   const email = session.customer_email;
@@ -216,6 +216,9 @@ export const createOrder = async (session) => {
   }
 };
 
+// @desc   Webhook Checkout for Stripe Chechkout Completed Event
+// @route  POST /webhook-checkout
+// @access Public
 export const webhookCheckout = asyncHandler(async (req, res, next) => {
   const sig = req.headers['stripe-signature'];
   let event;

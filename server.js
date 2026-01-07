@@ -40,7 +40,7 @@ app.post(
 );
 
 // Middlewares
-app.use(express.json());
+app.use(express.json({ limit: '20kb' })); // Limit request size to 20kb to avoid malicious attacks
 app.set('query parser', 'extended');
 app.use(express.static(path.join(__dirname, '/uploads')));
 
