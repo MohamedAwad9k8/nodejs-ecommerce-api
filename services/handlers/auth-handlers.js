@@ -7,6 +7,7 @@ import {
   verifyJWTToken,
   generateDummyHash,
 } from '../../utils/crypto-functions.js';
+import { sanitizeUser } from '../../utils/sanitize-data.js';
 import { HttpStatusCode, ApiError } from '../../utils/api-error.js';
 import { UserModel } from '../../models/user.model.js';
 
@@ -32,7 +33,7 @@ export const login = () =>
     const token = generateJWTToken(user._id);
     // 3) Send response to client side
     res.status(HttpStatusCode.OK).json({
-      data: user,
+      data: sanitizeUser(user),
       token,
     });
   });
@@ -50,7 +51,7 @@ export const signup = () =>
     const token = generateJWTToken(user._id);
     // 3- send response to client side
     res.status(HttpStatusCode.CREATED).json({
-      data: user,
+      data: sanitizeUser,
       token,
     });
   });
