@@ -284,3 +284,14 @@ node seeder.js -i
 # Remove sample data
 node seeder.js -d
 ```
+
+## What's Next / Next Steps
+
+This Node.js/Express project was built as part of my learning journey in backend engineering. While it’s fully functional for core e-commerce operations, the next steps include:
+
+- Migrating the API to **NestJS + TypeScript** for a more modular and maintainable architecture
+- Deploying the project on **AWS ECS** for cloud-based production readiness
+- Integrating **PostgreSQL** in place of MongoDB for relational data handling
+- Adding **Redis caching** for improved performance
+- Enhancing **security and input validation** with updated libraries and practices
+- Building a **modular microservices-ready architecture** to support future extensions (notifications, payment service, etc.)
