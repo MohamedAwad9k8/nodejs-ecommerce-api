@@ -1,0 +1,2597 @@
+openapi: 3.0.0
+info:
+  title: E-Commerce API
+  version: 1.0.0
+  description: |
+    A comprehensive REST API for an e-commerce platform built with Node.js, Express, and MongoDB.
+
+    ## Authentication
+    This API uses JWT (JSON Web Tokens) for authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <JWT_TOKEN>
+    ```
+
+    ## User Roles
+    - **User**: Regular customers (can access their own data and perform basic operations)
+    - **Admin**: Full administrative access to all resources
+    - **Manager**: Product and order management access
+
+    ## Rate Limiting
+    API requests are limited to 100 per 15 minutes per IP address.
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+  - url: https://your-api-domain.com/api/v1
+    description: Production server
+paths:
+  /api/v1/categories:
+    get:
+      summary: Get Categories
+      description: Retrieve paginated list of categories with optional filtering (Public)
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+          description: Page number for pagination
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          example: 10
+          description: Number of items per page
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: string
+          example: name,slug,image
+          description: Comma-separated list of fields to return
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+          example: electronics
+          description: Search keyword for category names
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+          example: name
+          description: Sort fields (prefix with - for descending)
+      responses:
+        '200':
+          description: Categories retrieved successfully
+      tags:
+        - Categories
+    post:
+      summary: Create Category
+      description: Create a new product category (Admin/Manager only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: Electronics
+                  description: Category name (required)
+                image:
+                  type: string
+                  format: binary
+                  description: Category image file (optional)
+      responses:
+        '201':
+          description: Category created successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+      tags:
+        - Categories
+      security:
+        - BearerAuth: []
+    get:
+      summary: Get Category By ID
+      description: Retrieve a specific category by its ID (Public)
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Category ID
+      responses:
+        '200':
+          description: Category retrieved successfully
+        '404':
+          description: Category not found
+      tags:
+        - Categories
+    put:
+      summary: Update Category By ID
+      description: Update category information (Admin/Manager only)
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Category ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Updated Electronics
+                  description: New category name (optional)
+                image:
+                  type: string
+                  format: binary
+                  description: New category image file (optional)
+      responses:
+        '200':
+          description: Category updated successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin/Manager access required
+        '404':
+          description: Category not found
+      tags:
+        - Categories
+      security:
+        - BearerAuth: []
+    delete:
+      summary: Delete Category By ID
+      description: Delete a category (Admin only)
+      parameters:
+        - name: category_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Category ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '204':
+          description: Category deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin access required
+        '404':
+          description: Category not found
+      tags:
+        - Categories
+      security:
+        - BearerAuth: []
+  /api/v1/subcategories:
+    get:
+      summary: Get SubCategories
+      description: Retrieve paginated list of subcategories with optional filtering (Public)
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+          description: Page number for pagination
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          example: 10
+          description: Number of items per page
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: string
+          example: name,slug,category
+          description: Comma-separated list of fields to return
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+          example: phone
+          description: Search keyword for subcategory names
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+          example: name
+          description: Sort fields (prefix with - for descending)
+      responses:
+        '200':
+          description: Subcategories retrieved successfully
+      tags:
+        - SubCategories
+    post:
+      summary: Create SubCategory
+      description: Create a new subcategory (Admin/Manager only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - category
+              properties:
+                name:
+                  type: string
+                  example: Smartphones
+                  description: Subcategory name (required)
+                category:
+                  type: string
+                  example: 507f1f77bcf86cd799439011
+                  description: Parent category ID (required)
+      responses:
+        '201':
+          description: Subcategory created successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin/Manager access required
+      tags:
+        - SubCategories
+      security:
+        - BearerAuth: []
+  /api/v1/subcategories/{subcategory_id}:
+    get:
+      summary: Get SubCategory By ID
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - SubCategories
+    put:
+      summary: Update SubCategory By ID
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - SubCategories
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+            example:
+              name: Subcategory Name
+    delete:
+      summary: Delete SubCategory By ID
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - SubCategories
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+  /api/v1/categories/{category_id}/subcategories:
+    get:
+      summary: Get All SubCategories of A Parent Category
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - Categories/subs
+    post:
+      summary: Create SubCategory on A Parent Category
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - Categories/subs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+            example:
+              name: Category Name
+  /api/v1/brands:
+    get:
+      summary: Get Brands
+      description: Retrieve paginated list of brands with optional filtering (Public)
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+          description: Page number for pagination
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          example: 10
+          description: Number of items per page
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: string
+          example: name,slug,image
+          description: Comma-separated list of fields to return
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+          example: apple
+          description: Search keyword for brand names
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+          example: name
+          description: Sort fields (prefix with - for descending)
+      responses:
+        '200':
+          description: Brands retrieved successfully
+      tags:
+        - Brands
+    post:
+      summary: Create Brand
+      description: Create a new brand (Admin/Manager only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: Apple
+                  description: Brand name (required, 2-32 characters, must be unique)
+                image:
+                  type: string
+                  format: binary
+                  description: Brand image file (optional)
+      responses:
+        '201':
+          description: Brand created successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+      tags:
+        - Brands
+      security:
+        - BearerAuth: []
+  /api/v1/brands/{brand_id}:
+    get:
+      summary: Get Brand By ID
+      description: Retrieve a specific brand by its ID (Public)
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Brand ID
+      responses:
+        '200':
+          description: Brand retrieved successfully
+        '404':
+          description: Brand not found
+      tags:
+        - Brands
+    put:
+      summary: Update Brand By ID
+      description: Update brand information (Admin/Manager only)
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Brand ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Apple Inc.
+                  description: New brand name (optional, 2-32 characters, must be unique)
+                image:
+                  type: string
+                  format: binary
+                  description: New brand image file (optional)
+      responses:
+        '200':
+          description: Brand updated successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+        '404':
+          description: Brand not found
+      tags:
+        - Brands
+      security:
+        - BearerAuth: []
+    delete:
+      summary: Delete Brand By ID
+      description: Delete a brand (Admin only)
+      parameters:
+        - name: brand_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Brand ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '204':
+          description: Brand deleted successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin access required
+        '404':
+          description: Brand not found
+      tags:
+        - Brands
+      security:
+        - BearerAuth: []
+  /api/v1/products:
+    get:
+      summary: Get Products (Public)
+      description: Retrieve a list of products with optional filtering, sorting, and pagination. No authentication required.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: ratingsAverage[gte]
+          in: query
+          schema:
+            type: integer
+          example: '3'
+        - name: price[lte]
+          in: query
+          schema:
+            type: integer
+          example: '300'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: '2'
+        - name: fields
+          in: query
+          schema:
+            type: string
+          example: title,sold
+        - name: keyword
+          in: query
+          schema:
+            type: string
+          example: men
+        - name: sort
+          in: query
+          schema:
+            type: string
+          example: '-price'
+      responses:
+        '200':
+          description: Products retrieved successfully
+      tags:
+        - Products
+    post:
+      summary: Create Product (Admin/Manager Only)
+      description: Create a new product. Requires Admin or Manager role. All fields except images are required in the form data.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin or Manager role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+                - quantity
+                - price
+                - imageCover
+                - category
+              properties:
+                title:
+                  type: string
+                  description: Product title (3-100 characters)
+                  example: "iPhone 15 Pro"
+                description:
+                  type: string
+                  description: Product description (minimum 20 characters)
+                  example: "The latest iPhone with advanced features and premium design"
+                quantity:
+                  type: integer
+                  description: Available quantity in stock
+                  example: 50
+                price:
+                  type: number
+                  description: Product price (0-500000)
+                  example: 999.99
+                priceAfterDiscount:
+                  type: number
+                  description: Optional discounted price
+                  example: 899.99
+                colors:
+                  type: array
+                  items:
+                    type: string
+                  description: Available colors
+                  example: ["Black", "White", "Gold"]
+                imageCover:
+                  type: string
+                  format: binary
+                  description: Main product image (required)
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Additional product images
+                category:
+                  type: string
+                  description: Category ID that this product belongs to
+                  example: "507f1f77bcf86cd799439011"
+                subcategories:
+                  type: array
+                  items:
+                    type: string
+                  description: Subcategory IDs
+                  example: ["507f1f77bcf86cd799439012"]
+                brand:
+                  type: string
+                  description: Brand ID
+                  example: "507f1f77bcf86cd799439013"
+      responses:
+        '201':
+          description: Product created successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin/Manager)
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+  /api/v1/products/{product_id}:
+    get:
+      summary: Get Product By ID (Public)
+      description: Retrieve a single product by its ID. No authentication required.
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: The ID of the product to retrieve
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Product retrieved successfully
+        '404':
+          description: Product not found
+      tags:
+        - Products
+    put:
+      summary: Update Product By ID (Admin/Manager Only)
+      description: Update an existing product. Requires Admin or Manager role. All fields are optional in the update.
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: The ID of the product to update
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin or Manager role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Product title (3-100 characters)
+                  example: "iPhone 15 Pro Max"
+                description:
+                  type: string
+                  description: Product description (minimum 20 characters)
+                  example: "Updated iPhone with enhanced features"
+                quantity:
+                  type: integer
+                  description: Available quantity in stock
+                  example: 75
+                price:
+                  type: number
+                  description: Product price (0-500000)
+                  example: 1199.99
+                priceAfterDiscount:
+                  type: number
+                  description: Optional discounted price
+                  example: 1099.99
+                colors:
+                  type: array
+                  items:
+                    type: string
+                  description: Available colors
+                  example: ["Black", "White", "Gold", "Blue"]
+                imageCover:
+                  type: string
+                  format: binary
+                  description: Main product image
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Additional product images
+                category:
+                  type: string
+                  description: Category ID that this product belongs to
+                  example: "507f1f77bcf86cd799439011"
+                subcategories:
+                  type: array
+                  items:
+                    type: string
+                  description: Subcategory IDs
+                  example: ["507f1f77bcf86cd799439012"]
+                brand:
+                  type: string
+                  description: Brand ID
+                  example: "507f1f77bcf86cd799439013"
+      responses:
+        '200':
+          description: Product updated successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin/Manager)
+        '404':
+          description: Product not found
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+    delete:
+      summary: Delete Product By ID (Admin Only)
+      description: Delete a product permanently. Requires Admin role only.
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: The ID of the product to delete
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '204':
+          description: Product deleted successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin)
+        '404':
+          description: Product not found
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+  /api/v1/admin/users:
+    post:
+      summary: Create User (Admin Only)
+      description: Create a new user account. Requires Admin role. Password will be hashed automatically.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  description: User's full name
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  description: User's email address (must be unique)
+                  example: "john.doe@example.com"
+                password:
+                  type: string
+                  minLength: 6
+                  description: User's password (minimum 6 characters)
+                  example: "password123"
+                phone:
+                  type: string
+                  description: User's phone number
+                  example: "+1234567890"
+                role:
+                  type: string
+                  enum: ["user", "admin", "manager"]
+                  description: User's role (defaults to 'user' if not specified)
+                  example: "user"
+                profileImg:
+                  type: string
+                  format: binary
+                  description: User's profile image
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Validation error (duplicate email, invalid data)
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin)
+      tags:
+        - Users (Admin)
+      security:
+        - BearerAuth: []
+    get:
+      summary: Get Users (Admin Only)
+      description: Retrieve a list of all users with optional filtering, sorting, and pagination. Requires Admin role.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '2'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: fields
+          in: query
+          schema:
+            type: string
+          example: name,slug
+        - name: keyword
+          in: query
+          schema:
+            type: string
+          example: john
+        - name: sort
+          in: query
+          schema:
+            type: string
+          example: name
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Users retrieved successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin)
+      tags:
+        - Users (Admin)
+      security:
+        - BearerAuth: []
+  /api/v1/admin/users/{user_id}:
+    get:
+      summary: Get User By ID (Admin Only)
+      description: Retrieve a single user by their ID. Requires Admin role.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user to retrieve
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: User retrieved successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin)
+        '404':
+          description: User not found
+      tags:
+        - Users (Admin)
+      security:
+        - BearerAuth: []
+    put:
+      summary: Update User By ID (Admin Only)
+      description: Update an existing user. Requires Admin role. All fields are optional in the update.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user to update
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: User's full name
+                  example: "Jane Doe"
+                email:
+                  type: string
+                  format: email
+                  description: User's email address (must be unique)
+                  example: "jane.doe@example.com"
+                phone:
+                  type: string
+                  description: User's phone number
+                  example: "+1987654321"
+                role:
+                  type: string
+                  enum: ["user", "admin", "manager"]
+                  description: User's role
+                  example: "manager"
+                profileImg:
+                  type: string
+                  format: binary
+                  description: User's profile image
+      responses:
+        '200':
+          description: User updated successfully
+        '400':
+          description: Validation error (duplicate email, invalid data)
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin)
+        '404':
+          description: User not found
+      tags:
+        - Users (Admin)
+      security:
+        - BearerAuth: []
+    delete:
+      summary: Delete User By ID (Admin Only)
+      description: Delete a user permanently. Requires Admin role.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user to delete
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '204':
+          description: User deleted successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin)
+        '404':
+          description: User not found
+      tags:
+        - Users (Admin)
+      security:
+        - BearerAuth: []
+  /api/v1/admin/users/reset-password/{user_id}:
+    put:
+      summary: Reset User Password By ID (Admin Only)
+      description: Reset a user's password to a temporary one and send it via email. Requires Admin role. No request body needed.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user whose password should be reset
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Password reset successfully, temporary password sent via email
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin)
+        '404':
+          description: User not found
+      tags:
+        - Users (Admin)
+      security:
+        - BearerAuth: []
+  /api/v1/admin/users/deactivate-account/{user_id}:
+    put:
+      summary: Deactivate User Account By ID (Admin Only)
+      description: Deactivate a user account by setting isActive to false. Requires Admin role. No request body needed.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: The ID of the user account to deactivate
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have Admin role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: User account deactivated successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not Admin)
+        '404':
+          description: User not found
+      tags:
+        - Users (Admin)
+      security:
+        - BearerAuth: []
+  /api/v1/users/get-me:
+    get:
+      summary: Get Logged In User Data (Authenticated Users)
+      description: Retrieve the current logged-in user's profile data. Requires valid JWT token.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: User data retrieved successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+      tags:
+        - Logged In Users
+      security:
+        - BearerAuth: []
+  /api/v1/users/update-me:
+    put:
+      summary: Update Logged In User Data (Authenticated Users)
+      description: Update the current logged-in user's profile data. All fields are optional.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: User's full name
+                  example: "John Smith"
+                email:
+                  type: string
+                  format: email
+                  description: User's email address (must be unique)
+                  example: "john.smith@example.com"
+                phone:
+                  type: string
+                  description: User's phone number
+                  example: "+1555123456"
+                profileImg:
+                  type: string
+                  format: binary
+                  description: User's profile image
+      responses:
+        '200':
+          description: User data updated successfully
+        '400':
+          description: Validation error (duplicate email, invalid data)
+        '401':
+          description: Unauthorized - Invalid or missing token
+      tags:
+        - Logged In Users
+      security:
+        - BearerAuth: []
+  /api/v1/users/change-my-password:
+    put:
+      summary: Change Logged In User Password (Authenticated Users)
+      description: Change the current logged-in user's password. Requires current password for verification.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+                - newPasswordConfirm
+              properties:
+                currentPassword:
+                  type: string
+                  description: User's current password
+                  example: "oldpassword123"
+                newPassword:
+                  type: string
+                  minLength: 6
+                  description: New password (minimum 6 characters)
+                  example: "newpassword123"
+                newPasswordConfirm:
+                  type: string
+                  description: Confirmation of new password (must match newPassword)
+                  example: "newpassword123"
+      responses:
+        '200':
+          description: Password changed successfully
+        '400':
+          description: Validation error (passwords don't match, invalid current password)
+        '401':
+          description: Unauthorized - Invalid or missing token
+      tags:
+        - Logged In Users
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+                newPasswordConfirm:
+                  type: string
+            example:
+              currentPassword: password
+              newPassword: new-password
+              newPasswordConfirm: new-password
+  /api/v1/users/deactivate-me:
+    put:
+      summary: Deactivate Logged In User Account
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - Logged In Users
+      security:
+        - BearerAuth: []
+  /api/v1/users/delete-me:
+    delete:
+      summary: Delete Logged In User Account
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - Logged In Users
+      security:
+        - BearerAuth: []
+  /api/v1/auth/signup:
+    post:
+      summary: User Signup
+      description: Register a new user account (Public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+                - passwordConfirm
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                  description: User full name (required)
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                  description: User email address (required)
+                password:
+                  type: string
+                  example: password123
+                  description: User password (required)
+                passwordConfirm:
+                  type: string
+                  example: password123
+                  description: Password confirmation (required)
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Validation error
+      tags:
+        - Authentication
+  /api/v1/auth/login:
+    post:
+      summary: User Login
+      description: Authenticate user and return JWT token (Public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                  description: User email address (required)
+                password:
+                  type: string
+                  example: password123
+                  description: User password (required)
+      responses:
+        '200':
+          description: Login successful, returns JWT token
+        '401':
+          description: Invalid credentials
+      tags:
+        - Authentication
+  /api/v1/auth/forget-password:
+    post:
+      summary: Forget Password
+      parameters:
+        - name: name
+          in: query
+          required: false
+          deprecated: false
+          schema: {}
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+            example:
+              email: johndoe@gmail.com
+  /api/v1/auth/verify-reset-code:
+    post:
+      summary: Verify Password Reset Code
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resetCode:
+                  type: string
+                  format: color
+            example:
+              resetCode: '141652'
+  /api/v1/auth/reset-password:
+    put:
+      summary: Reset Password
+      parameters:
+        - name: name
+          in: query
+          required: false
+          deprecated: false
+          schema: {}
+        - name: Authorization
+          in: header
+          required: false
+          deprecated: false
+          schema: {}
+          example: >-
+            bearer
+            <JWT_TOKEN>
+      responses: {}
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                newPassword:
+                  type: string
+                newPasswordConfirm:
+                  type: string
+            example:
+              email: johndoe@gmail.com
+              newPassword: new_Password
+              newPasswordConfirm: new_Password
+  /api/v1/reviews:
+    get:
+      summary: Get All Reviews
+      description: Retrieve all reviews with optional filtering and pagination (Public)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          example: 2
+          description: Page number for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+          example: 10
+          description: Number of reviews per page
+        - name: fields
+          in: query
+          schema:
+            type: string
+          example: title,rating,user,product
+          description: Comma-separated list of fields to include
+        - name: keyword
+          in: query
+          schema:
+            type: string
+          example: excellent
+          description: Search keyword for review titles
+        - name: sort
+          in: query
+          schema:
+            type: string
+          example: -createdAt,rating
+          description: Sort fields (prefix with - for descending)
+      responses:
+        '200':
+          description: Reviews retrieved successfully
+      tags:
+        - Reviews
+    post:
+      summary: Create New Review
+      description: Create a new review (User only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+                - product
+              properties:
+                title:
+                  type: string
+                  example: Excellent product quality!
+                  description: Review title (optional)
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  example: 5
+                  description: Rating from 1 to 5 (required)
+                product:
+                  type: string
+                  example: 507f1f77bcf86cd799439011
+                  description: Product ID to review (required)
+      responses:
+        '201':
+          description: Review created successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+        '404':
+          description: Product not found
+      tags:
+        - Reviews
+      security:
+        - BearerAuth: []
+  /api/v1/reviews/{review_id}:
+    get:
+      summary: Get Review By ID
+      description: Retrieve a specific review by its ID (Public)
+      parameters:
+        - name: review_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Review ID
+      responses:
+        '200':
+          description: Review retrieved successfully
+        '404':
+          description: Review not found
+      tags:
+        - Reviews
+    put:
+      summary: Update Review By ID
+      description: Update review information (User only - review owner)
+      parameters:
+        - name: review_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Review ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Updated review title
+                  description: New review title (optional)
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  example: 4
+                  description: New rating from 1 to 5 (optional)
+      responses:
+        '200':
+          description: Review updated successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Only review owner can update
+        '404':
+          description: Review not found
+      tags:
+        - Reviews
+      security:
+        - BearerAuth: []
+    delete:
+      summary: Delete Review By ID
+      description: Delete a review (User/Admin/Manager - review owner or admin)
+      parameters:
+        - name: review_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Review ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '204':
+          description: Review deleted successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Only review owner or admin/manager can delete
+        '404':
+          description: Review not found
+      tags:
+        - Reviews
+      security:
+        - BearerAuth: []
+  /api/v1/products/{product_id}/reviews:
+    get:
+      summary: Get All Reviews On Specific Product
+      responses: {}
+      tags:
+        - Products/Reviews
+    post:
+      summary: Create Review On Specific Product
+      responses: {}
+      tags:
+        - Products/Reviews
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                rating:
+                  type: integer
+            example:
+              title: Good
+              rating: 1
+  /api/v1/products/{product_id}/reviews/{review_id}:
+    get:
+      summary: Get Specific Review On Specific Product Copy
+      responses: {}
+      tags:
+        - Products/Reviews
+  /api/v1/wishlist:
+    get:
+      summary: Get User Wishlist
+      description: Retrieve the authenticated user's wishlist (User only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Wishlist retrieved successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+      tags:
+        - Wishlist
+      security:
+        - BearerAuth: []
+    post:
+      summary: Add Product To Wishlist
+      description: Add a product to the authenticated user's wishlist (User only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+              properties:
+                productId:
+                  type: string
+                  example: 507f1f77bcf86cd799439011
+                  description: Product ID to add to wishlist
+      responses:
+        '200':
+          description: Product added to wishlist successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+        '404':
+          description: Product not found
+      tags:
+        - Wishlist
+      security:
+        - BearerAuth: []
+  /api/v1/wishlist/{product_id}:
+    delete:
+      summary: Remove Product From Wishlist
+      description: Remove a product from the authenticated user's wishlist (User only)
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Product ID to remove from wishlist
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Product removed from wishlist successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+        '404':
+          description: Product not found in wishlist
+      tags:
+        - Wishlist
+      security:
+        - BearerAuth: []
+  /api/v1/addresses:
+    get:
+      summary: Get User Addresses
+      description: Retrieve all addresses for the authenticated user (User only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Addresses retrieved successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+      tags:
+        - Addresses
+      security:
+        - BearerAuth: []
+    post:
+      summary: Add New Address
+      description: Add a new address to the authenticated user's profile (User only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - alias
+                - details
+                - phone
+                - city
+                - postalCode
+                - country
+              properties:
+                alias:
+                  type: string
+                  example: Home
+                  description: Address nickname (e.g., Home, Work, etc.)
+                details:
+                  type: string
+                  example: 123 Main Street, Apartment 4B
+                  description: Detailed street address
+                phone:
+                  type: string
+                  example: "+1-555-123-4567"
+                  description: Contact phone number for this address
+                city:
+                  type: string
+                  example: Cairo
+                  description: City name
+                postalCode:
+                  type: string
+                  example: "11454"
+                  description: Postal/ZIP code
+                country:
+                  type: string
+                  example: Egypt
+                  description: Country name
+      responses:
+        '200':
+          description: Address added successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+      tags:
+        - Addresses
+      security:
+        - BearerAuth: []
+  /api/v1/addresses/{address_id}:
+    delete:
+      summary: Remove Address
+      description: Remove an address from the authenticated user's profile (User only)
+      parameters:
+        - name: address_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Address ID to remove
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Address removed successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+        '404':
+          description: Address not found
+      tags:
+        - Addresses
+      security:
+        - BearerAuth: []
+  /api/v1/coupons:
+    get:
+      summary: Get All Coupons
+      description: Retrieve all coupons with optional filtering and pagination (Admin/Manager only)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          example: 2
+          description: Page number for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+          example: 10
+          description: Number of coupons per page
+        - name: fields
+          in: query
+          schema:
+            type: string
+          example: name,discount,expireAt
+          description: Comma-separated list of fields to include
+        - name: keyword
+          in: query
+          schema:
+            type: string
+          example: SUMMER
+          description: Search keyword for coupon names
+        - name: sort
+          in: query
+          schema:
+            type: string
+          example: -createdAt,discount
+          description: Sort fields (prefix with - for descending)
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Coupons retrieved successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+      tags:
+        - Coupons
+      security:
+        - BearerAuth: []
+    post:
+      summary: Create New Coupon
+      description: Create a new coupon (Admin/Manager only)
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - discount
+                - expireAt
+              properties:
+                name:
+                  type: string
+                  example: SUMMER2024
+                  description: Unique coupon code name (will be converted to uppercase)
+                discount:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                  example: 20
+                  description: Discount percentage (0-100)
+                expireAt:
+                  type: string
+                  format: date
+                  example: 2024-12-31
+                  description: Expiration date (ISO date format)
+                maximumDiscountAmount:
+                  type: number
+                  minimum: 0
+                  example: 100
+                  description: Maximum discount amount in currency units (optional)
+      responses:
+        '201':
+          description: Coupon created successfully
+        '400':
+          description: Validation error or duplicate coupon name
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+      tags:
+        - Coupons
+      security:
+        - BearerAuth: []
+  /api/v1/coupons/{coupon_id}:
+    get:
+      summary: Get Coupon By ID
+      description: Retrieve a specific coupon by its ID (Admin/Manager only)
+      parameters:
+        - name: coupon_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Coupon ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Coupon retrieved successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+        '404':
+          description: Coupon not found
+      tags:
+        - Coupons
+      security:
+        - BearerAuth: []
+    put:
+      summary: Update Coupon By ID
+      description: Update coupon information (Admin/Manager only)
+      parameters:
+        - name: coupon_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Coupon ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: WINTER2024
+                  description: New coupon code name (optional, will be converted to uppercase)
+                discount:
+                  type: number
+                  minimum: 0
+                  maximum: 100
+                  example: 25
+                  description: New discount percentage (optional, 0-100)
+                expireAt:
+                  type: string
+                  format: date
+                  example: 2024-12-31
+                  description: New expiration date (optional, ISO date format)
+                maximumDiscountAmount:
+                  type: number
+                  minimum: 0
+                  example: 150
+                  description: New maximum discount amount (optional)
+      responses:
+        '200':
+          description: Coupon updated successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+        '404':
+          description: Coupon not found
+      tags:
+        - Coupons
+      security:
+        - BearerAuth: []
+    delete:
+      summary: Delete Coupon By ID
+      description: Delete a coupon (Admin/Manager only)
+      parameters:
+        - name: coupon_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Coupon ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '204':
+          description: Coupon deleted successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+        '404':
+          description: Coupon not found
+      tags:
+        - Coupons
+      security:
+        - BearerAuth: []
+  /api/v1/cart:
+    get:
+      summary: Get Cart For Logged In User (Authenticated Users)
+      description: Retrieve the logged-in user's cart with all items. Requires User role.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have User role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Cart retrieved successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not User)
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+    post:
+      summary: Add Product To Cart (Authenticated Users)
+      description: Add a product to the logged-in user's cart. Requires User role.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have User role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+              properties:
+                productId:
+                  type: string
+                  description: The ID of the product to add to cart
+                  example: "507f1f77bcf86cd799439011"
+                quantity:
+                  type: integer
+                  description: Quantity of the product (defaults to 1)
+                  minimum: 1
+                  example: 2
+                color:
+                  type: string
+                  description: Color variant of the product
+                  example: "blue"
+      responses:
+        '200':
+          description: Product added to cart successfully
+        '400':
+          description: Validation error (invalid product ID, quantity)
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not User)
+        '404':
+          description: Product not found
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+    delete:
+      summary: Clear Cart (Authenticated Users)
+      description: Remove all items from the logged-in user's cart. Requires User role.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have User role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '204':
+          description: Cart cleared successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not User)
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+  /api/v1/cart/item_id:
+    put:
+      summary: Update Cart Item Quantity By ID (Authenticated Users)
+      description: Update the quantity of a specific item in the logged-in user's cart. Requires User role.
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          description: The ID of the cart item to update
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have User role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quantity
+              properties:
+                quantity:
+                  type: integer
+                  description: New quantity for the cart item
+                  minimum: 1
+                  example: 3
+      responses:
+        '200':
+          description: Cart item quantity updated successfully
+        '400':
+          description: Validation error (invalid quantity)
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not User)
+        '404':
+          description: Cart item not found
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+    delete:
+      summary: Delete Cart Item By Item ID (Authenticated Users)
+      description: Remove a specific item from the logged-in user's cart. Requires User role.
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          description: The ID of the cart item to remove
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have User role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '204':
+          description: Cart item removed successfully
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not User)
+        '404':
+          description: Cart item not found
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+  /api/v1/cart/apply-coupon:
+    put:
+      summary: Apply Coupon To Cart (Authenticated Users)
+      description: Apply a discount coupon to the logged-in user's cart. Requires User role.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication. Must have User role.
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - coupon
+              properties:
+                coupon:
+                  type: string
+                  description: The coupon code to apply
+                  example: "NEWYEAR50"
+      responses:
+        '200':
+          description: Coupon applied successfully
+        '400':
+          description: Invalid or expired coupon
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Insufficient permissions (not User)
+      tags:
+        - Cart
+      security:
+        - BearerAuth: []
+  /api/v1/orders/{cart_id}:
+    post:
+      summary: Create Cash Order
+      description: Create a new cash order from cart (User only)
+      parameters:
+        - name: cart_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Cart ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - shippingAddress
+              properties:
+                shippingAddress:
+                  type: object
+                  required:
+                    - details
+                    - city
+                    - postalCode
+                  properties:
+                    details:
+                      type: string
+                      example: 123 Main Street, Apartment 4B
+                      description: Detailed address information
+                    city:
+                      type: string
+                      example: Cairo
+                      description: City name
+                    postalCode:
+                      type: string
+                      example: "11454"
+                      description: Postal code
+      responses:
+        '201':
+          description: Cash order created successfully
+        '400':
+          description: Validation error or empty cart
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+        '404':
+          description: Cart not found
+      tags:
+        - Orders
+      security:
+        - BearerAuth: []
+  /api/v1/orders/checkout/{cart_id}:
+    get:
+      summary: Get Checkout Session
+      description: Get Stripe checkout session URL for online payment (User only)
+      parameters:
+        - name: cart_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Cart ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Checkout session URL returned successfully
+        '400':
+          description: Invalid cart or payment setup error
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - User access required
+        '404':
+          description: Cart not found
+      tags:
+        - Orders
+      security:
+        - BearerAuth: []
+  /api/v1/orders:
+    get:
+      summary: Get All Orders
+      description: Retrieve all orders for the authenticated user (User/Admin/Manager)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          example: 2
+          description: Page number for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+          example: 10
+          description: Number of orders per page
+        - name: fields
+          in: query
+          schema:
+            type: string
+          example: totalOrderPrice,paymentMethodType,isPaid
+          description: Comma-separated list of fields to include
+        - name: keyword
+          in: query
+          schema:
+            type: string
+          example: pending
+          description: Search keyword for order status
+        - name: sort
+          in: query
+          schema:
+            type: string
+          example: -createdAt,totalOrderPrice
+          description: Sort fields (prefix with - for descending)
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Orders retrieved successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Insufficient permissions
+      tags:
+        - Orders
+      security:
+        - BearerAuth: []
+  /api/v1/orders/{order_id}:
+    get:
+      summary: Get Order By ID
+      description: Retrieve a specific order by its ID (User/Admin/Manager - own orders or admin)
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Order ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Order retrieved successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Can only access own orders or admin access required
+        '404':
+          description: Order not found
+      tags:
+        - Orders
+      security:
+        - BearerAuth: []
+  /api/v1/orders/{order_id}/pay:
+    put:
+      summary: Mark Order As Paid
+      description: Update order status to paid (Admin/Manager only)
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Order ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Order marked as paid successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+        '404':
+          description: Order not found
+      tags:
+        - Orders
+      security:
+        - BearerAuth: []
+  /api/v1/orders/{order_id}/deliver:
+    put:
+      summary: Mark Order As Delivered
+      description: Update order status to delivered (Admin/Manager only)
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 507f1f77bcf86cd799439011
+          description: Order ID
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          example: Bearer <JWT_TOKEN>
+      responses:
+        '200':
+          description: Order marked as delivered successfully
+        '401':
+          description: Unauthorized - Authentication required
+        '403':
+          description: Forbidden - Admin/Manager access required
+        '404':
+          description: Order not found
+      tags:
+        - Orders
+      security:
+        - BearerAuth: []
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

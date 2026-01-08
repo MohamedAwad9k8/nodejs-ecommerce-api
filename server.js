@@ -11,6 +11,7 @@ import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import ExpressMongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
+import { setupSwagger } from './config/swagger.js';
 
 import { dbConnect } from './config/database.js';
 import { ApiError, HttpStatusCode } from './utils/api-error.js';
@@ -70,6 +71,9 @@ app.use('/api', limiter);
 app.use(
   hpp({ whitelist: ['price', 'ratingAverage', 'subcategories', 'images'] })
 );
+
+// Swagger UI setup
+setupSwagger(app, __dirname);
 
 // Mount Routes
 mountRoutes(app);
